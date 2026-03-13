@@ -1,19 +1,45 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Swords, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, Navigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [name, setName] = useState('');
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { session, signUp } = useAuth();
 
-  const handleRegister = (e: React.FormEvent) => {
+  if (session) return <Navigate to="/home" replace />;
+
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    navigate('/anamnesis');
+    if (!name || !username || !email || !password) {
+      toast.error('Preencha todos os campos');
+      return;
+    }
+    if (password.length < 8) {
+      toast.error('Senha deve ter pelo menos 8 caracteres');
+      return;
+    }
+    setLoading(true);
+    const { error } = await signUp(email, password, name, username);
+    setLoading(false);
+    if (error) {
+      toast.error(error.message || 'Erro ao criar conta');
+    } else {
+      toast.success('Conta criada! Verifique seu email para confirmar.');
+      navigate('/login');
+    }
   };
 
   return (
@@ -40,21 +66,21 @@ export default function RegisterPage() {
                 <Label>Nome completo</Label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input placeholder="Seu nome de herói" className="pl-10" />
+                  <Input placeholder="Seu nome de herói" className="pl-10" value={name} onChange={(e) => setName(e.target.value)} />
                 </div>
               </div>
               <div className="space-y-2">
                 <Label>Username</Label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">@</span>
-                  <Input placeholder="heroi_rpg" className="pl-8" />
+                  <Input placeholder="heroi_rpg" className="pl-8" value={username} onChange={(e) => setUsername(e.target.value)} />
                 </div>
               </div>
               <div className="space-y-2">
                 <Label>Email</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input type="email" placeholder="heroi@questfit.com" className="pl-10" />
+                  <Input type="email" placeholder="heroi@questfit.com" className="pl-10" value={email} onChange={(e) => setEmail(e.target.value)} />
                 </div>
               </div>
               <div className="space-y-2">
@@ -63,8 +89,10 @@ export default function RegisterPage() {
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="Mín. 8 chars (A-z, 0-9)"
+                    placeholder="Mín. 8 caracteres"
                     className="pl-10 pr-10"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                   />
                   <button
                     type="button"
@@ -75,8 +103,8 @@ export default function RegisterPage() {
                   </button>
                 </div>
               </div>
-              <Button type="submit" className="w-full font-display text-base">
-                🗡️ Criar Conta
+              <Button type="submit" className="w-full font-display text-base" disabled={loading}>
+                {loading ? 'Criando...' : '🗡️ Criar Conta'}
               </Button>
             </form>
 

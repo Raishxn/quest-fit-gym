@@ -8,11 +8,14 @@ export default {
     container: {
       center: true,
       padding: "2rem",
-      screens: {
-        "2xl": "1400px",
-      },
+      screens: { "2xl": "1400px" },
     },
     extend: {
+      fontFamily: {
+        display: ["Rajdhani", "sans-serif"],
+        body: ["Inter", "system-ui", "sans-serif"],
+        mono: ["JetBrains Mono", "monospace"],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -38,6 +41,8 @@ export default {
         accent: {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
+          glow: "hsl(var(--accent-glow))",
+          muted: "hsl(var(--accent-muted))",
         },
         popover: {
           DEFAULT: "hsl(var(--popover))",
@@ -57,6 +62,13 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        success: "hsl(var(--success))",
+        warning: "hsl(var(--warning))",
+        info: "hsl(var(--info))",
+        "attr-str": "hsl(var(--attr-str))",
+        "attr-end": "hsl(var(--attr-end))",
+        "attr-vit": "hsl(var(--attr-vit))",
+        "attr-agi": "hsl(var(--attr-agi))",
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -65,25 +77,27 @@ export default {
       },
       keyframes: {
         "accordion-down": {
-          from: {
-            height: "0",
-          },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
-          },
-          to: {
-            height: "0",
-          },
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+        "pulse-glow": {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.6" },
+        },
+        "xp-fill": {
+          from: { width: "0%" },
+          to: { width: "var(--xp-percent)" },
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "pulse-glow": "pulse-glow 2s ease-in-out infinite",
+        "xp-fill": "xp-fill 1s ease-out forwards",
       },
     },
   },

@@ -3,6 +3,8 @@ import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { AuthProvider } from "@/hooks/useAuth";
+import { ProtectedRoute } from "@/components/shared/ProtectedRoute";
 import { DashboardLayout } from "@/layouts/DashboardLayout";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
@@ -25,28 +27,37 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          {/* Auth pages */}
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/anamnesis" element={<AnamnesisPage />} />
-          <Route path="/upgrade" element={<UpgradePage />} />
+        <AuthProvider>
+          <Routes>
+            {/* Public auth pages */}
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
 
-          {/* Dashboard pages */}
-          <Route element={<DashboardLayout />}>
-            <Route path="/home" element={<HomePage />} />
-            <Route path="/workout" element={<WorkoutPage />} />
-            <Route path="/diet" element={<DietPage />} />
-            <Route path="/cardio" element={<CardioPage />} />
-            <Route path="/ranking" element={<RankingPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/settings" element={<SettingsPage />} />
-          </Route>
+            {/* Protected pages */}
+            <Route path="/anamnesis" element={
+              <ProtectedRoute><AnamnesisPage /></ProtectedRoute>
+            } />
+            <Route path="/upgrade" element={
+              <ProtectedRoute><UpgradePage /></ProtectedRoute>
+            } />
 
-          {/* Redirect root to home */}
-          <Route path="/" element={<Navigate to="/home" replace />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+            {/* Dashboard (protected) */}
+            <Route element={
+              <ProtectedRoute><DashboardLayout /></ProtectedRoute>
+            }>
+              <Route path="/home" element={<HomePage />} />
+              <Route path="/workout" element={<WorkoutPage />} />
+              <Route path="/diet" element={<DietPage />} />
+              <Route path="/cardio" element={<CardioPage />} />
+              <Route path="/ranking" element={<RankingPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/settings" element={<SettingsPage />} />
+            </Route>
+
+            <Route path="/" element={<Navigate to="/home" replace />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

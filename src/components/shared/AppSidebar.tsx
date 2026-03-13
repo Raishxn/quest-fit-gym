@@ -1,7 +1,7 @@
 import { Home, Dumbbell, Salad, Activity, Trophy, User, Settings, Swords } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useLocation } from 'react-router-dom';
-import { useUserStore } from '@/store/user';
+import { useAuth } from '@/hooks/useAuth';
 import { XPBar } from '@/components/rpg/XPBar';
 import { LevelBadge } from '@/components/rpg/LevelBadge';
 import {
@@ -31,7 +31,7 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
   const location = useLocation();
-  const user = useUserStore((s) => s.user);
+  const { profile } = useAuth();
 
   return (
     <Sidebar collapsible="icon">
@@ -75,24 +75,24 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="p-3 border-t border-border">
-        {user && !collapsed && (
+        {profile && !collapsed && (
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">
-                {user.name.charAt(0)}
+                {profile.name.charAt(0)}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{user.name}</p>
-                <LevelBadge level={user.level} className={user.className} size="sm" />
+                <p className="text-sm font-medium truncate">{profile.name}</p>
+                <LevelBadge level={profile.level} className={profile.className} size="sm" />
               </div>
             </div>
-            <XPBar xp={user.xp} level={user.level} compact />
+            <XPBar xp={profile.xp} level={profile.level} compact />
           </div>
         )}
-        {user && collapsed && (
+        {profile && collapsed && (
           <div className="flex justify-center">
             <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">
-              {user.name.charAt(0)}
+              {profile.name.charAt(0)}
             </div>
           </div>
         )}

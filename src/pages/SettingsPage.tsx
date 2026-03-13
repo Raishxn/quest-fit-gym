@@ -7,11 +7,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { ThemeSwitcher } from '@/components/shared/ThemeSwitcher';
-import { useUserStore } from '@/store/user';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function SettingsPage() {
-  const user = useUserStore((s) => s.user);
-  if (!user) return null;
+  const { profile } = useAuth();
+  if (!profile) return null;
 
   return (
     <div className="space-y-6 max-w-3xl mx-auto">
@@ -36,18 +36,9 @@ export default function SettingsPage() {
             <CardHeader><CardTitle className="font-display">Conta</CardTitle></CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label>Nome</Label>
-                  <Input defaultValue={user.name} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Username</Label>
-                  <Input defaultValue={user.username} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Email</Label>
-                  <Input defaultValue={user.email} disabled />
-                </div>
+                <div className="space-y-2"><Label>Nome</Label><Input defaultValue={profile.name} /></div>
+                <div className="space-y-2"><Label>Username</Label><Input defaultValue={profile.username} /></div>
+                <div className="space-y-2"><Label>Email</Label><Input defaultValue={profile.email} disabled /></div>
               </div>
               <Button className="font-display">Salvar Alterações</Button>
             </CardContent>
@@ -60,14 +51,8 @@ export default function SettingsPage() {
             <CardContent className="space-y-6">
               <ThemeSwitcher />
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <Label>Reduzir animações</Label>
-                  <Switch />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label>Sons de level-up</Label>
-                  <Switch defaultChecked />
-                </div>
+                <div className="flex items-center justify-between"><Label>Reduzir animações</Label><Switch /></div>
+                <div className="flex items-center justify-between"><Label>Sons de level-up</Label><Switch defaultChecked /></div>
               </div>
             </CardContent>
           </Card>
@@ -79,22 +64,10 @@ export default function SettingsPage() {
             <CardContent className="space-y-4">
               <p className="text-sm text-muted-foreground">Metas calculadas pela anamnese. Ajuste manualmente se necessário (±30%).</p>
               <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label>Meta Calórica (kcal)</Label>
-                  <Input type="number" defaultValue="2400" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Proteína (g)</Label>
-                  <Input type="number" defaultValue="160" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Gordura (g)</Label>
-                  <Input type="number" defaultValue="67" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Carboidratos (g)</Label>
-                  <Input type="number" defaultValue="290" />
-                </div>
+                <div className="space-y-2"><Label>Meta Calórica (kcal)</Label><Input type="number" defaultValue="2400" /></div>
+                <div className="space-y-2"><Label>Proteína (g)</Label><Input type="number" defaultValue="160" /></div>
+                <div className="space-y-2"><Label>Gordura (g)</Label><Input type="number" defaultValue="67" /></div>
+                <div className="space-y-2"><Label>Carboidratos (g)</Label><Input type="number" defaultValue="290" /></div>
               </div>
               <Button variant="outline" className="font-display">🧠 Refazer Anamnese</Button>
             </CardContent>
@@ -105,11 +78,8 @@ export default function SettingsPage() {
           <Card>
             <CardHeader><CardTitle className="font-display">Notificações</CardTitle></CardHeader>
             <CardContent className="space-y-3">
-              {['Streak em risco', 'Personal Record', 'Pedidos de amizade', 'Convites de Party', 'Level-up', 'Conquistas'].map((notif) => (
-                <div key={notif} className="flex items-center justify-between">
-                  <Label>{notif}</Label>
-                  <Switch defaultChecked />
-                </div>
+              {['Streak em risco', 'Personal Record', 'Pedidos de amizade', 'Convites de Party', 'Level-up', 'Conquistas'].map((n) => (
+                <div key={n} className="flex items-center justify-between"><Label>{n}</Label><Switch defaultChecked /></div>
               ))}
             </CardContent>
           </Card>
@@ -128,10 +98,7 @@ export default function SettingsPage() {
                 </div>
               </div>
               {['Histórico de treinos', 'PRs', 'Conquistas', 'Status online'].map((item) => (
-                <div key={item} className="flex items-center justify-between">
-                  <Label>Ocultar {item.toLowerCase()}</Label>
-                  <Switch />
-                </div>
+                <div key={item} className="flex items-center justify-between"><Label>Ocultar {item.toLowerCase()}</Label><Switch /></div>
               ))}
             </CardContent>
           </Card>
@@ -145,9 +112,7 @@ export default function SettingsPage() {
                 <p className="font-display font-bold text-lg">🪨 Free</p>
                 <p className="text-sm text-muted-foreground">2 programas • 10 exercícios custom • histórico 30d</p>
               </div>
-              <Button className="font-display w-full" asChild>
-                <a href="/upgrade">⚔️ Fazer Upgrade</a>
-              </Button>
+              <Button className="font-display w-full" asChild><a href="/upgrade">⚔️ Fazer Upgrade</a></Button>
             </CardContent>
           </Card>
         </TabsContent>

@@ -1,14 +1,15 @@
 import { motion } from 'framer-motion';
-import { Flame, Dumbbell, Salad, Activity, Trophy, Swords } from 'lucide-react';
+import { Flame, Dumbbell, Salad, Swords } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useUserStore } from '@/store/user';
+import { useAuth } from '@/hooks/useAuth';
 import { XPBar } from '@/components/rpg/XPBar';
 import { LevelBadge } from '@/components/rpg/LevelBadge';
 import { AttributeBars } from '@/components/rpg/AttributeBars';
-import { mockDietToday, mockRecentWorkouts, mockRanking, mockFeed } from '@/lib/mock-data';
+import { mockDietToday, mockRanking, mockFeed } from '@/lib/mock-data';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { Trophy } from 'lucide-react';
 
 const feedTypeLabels: Record<string, { icon: string | ((d: any) => string); text: (d: any) => string }> = {
   workout_complete: { icon: '🏋️', text: (d) => `completou treino ${d.day} — ${d.volume}kg volume` },
@@ -20,48 +21,41 @@ const feedTypeLabels: Record<string, { icon: string | ((d: any) => string); text
 };
 
 export default function HomePage() {
-  const user = useUserStore((s) => s.user);
-  if (!user) return null;
+  const { profile } = useAuth();
+  if (!profile) return null;
 
   const diet = mockDietToday;
   const calPercent = Math.min(100, (diet.totalCalories / diet.targetCalories) * 100);
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="space-y-1"
-      >
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-1">
         <h1 className="text-3xl font-display font-bold">
-          Olá, {user.name.split(' ')[0]}! <Swords className="inline h-7 w-7 text-primary" />
+          Olá, {profile.name.split(' ')[0]}! <Swords className="inline h-7 w-7 text-primary" />
         </h1>
         <p className="text-muted-foreground">Level up your body. Conquer your limits.</p>
       </motion.div>
 
-      {/* XP + Level */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
         <Card className="border-primary/20 glow-primary">
           <CardContent className="pt-4 space-y-3">
             <div className="flex items-center justify-between">
-              <LevelBadge level={user.level} className={user.className} size="md" />
-              {user.specialization && (
+              <LevelBadge level={profile.level} className={profile.className} size="md" />
+              {profile.specialization && (
                 <span className="text-sm text-muted-foreground">
-                  {user.specialization === 'hercules' && '🏋️ Hércules'}
-                  {user.specialization === 'hermes' && '🏃 Hermes'}
-                  {user.specialization === 'apollo' && '🥗 Apollo'}
-                  {user.specialization === 'athena' && '⚖️ Atena'}
+                  {profile.specialization === 'hercules' && '🏋️ Hércules'}
+                  {profile.specialization === 'hermes' && '🏃 Hermes'}
+                  {profile.specialization === 'apollo' && '🥗 Apollo'}
+                  {profile.specialization === 'athena' && '⚖️ Atena'}
                 </span>
               )}
             </div>
-            <XPBar xp={user.xp} level={user.level} />
+            <XPBar xp={profile.xp} level={profile.level} />
           </CardContent>
         </Card>
       </motion.div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {/* Streak */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
           <Card>
             <CardContent className="pt-4 flex items-center gap-4">
@@ -69,14 +63,13 @@ export default function HomePage() {
                 <Flame className="h-8 w-8 text-primary animate-pulse-glow" />
               </div>
               <div>
-                <p className="text-3xl font-display font-bold">{user.streak}</p>
+                <p className="text-3xl font-display font-bold">{profile.streak}</p>
                 <p className="text-sm text-muted-foreground">dias de streak</p>
               </div>
             </CardContent>
           </Card>
         </motion.div>
 
-        {/* Calorias Hoje */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
           <Card>
             <CardContent className="pt-4 space-y-2">
@@ -98,20 +91,18 @@ export default function HomePage() {
           </Card>
         </motion.div>
 
-        {/* Atributos RPG */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-display">Atributos RPG</CardTitle>
             </CardHeader>
             <CardContent>
-              <AttributeBars str={user.strAttr} end={user.endAttr} vit={user.vitAttr} agi={user.agiAttr} compact />
+              <AttributeBars str={profile.strAttr} end={profile.endAttr} vit={profile.vitAttr} agi={profile.agiAttr} compact />
             </CardContent>
           </Card>
         </motion.div>
       </div>
 
-      {/* Próximo Treino + Quick Actions */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
         <Card className="border-primary/10">
           <CardContent className="pt-4">
@@ -121,12 +112,12 @@ export default function HomePage() {
                   <Dumbbell className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <p className="font-display font-bold">Push Pull Legs</p>
-                  <p className="text-sm text-muted-foreground">Próximo: Push A</p>
+                  <p className="font-display font-bold">Iniciar Treino</p>
+                  <p className="text-sm text-muted-foreground">Comece sua próxima sessão</p>
                 </div>
               </div>
               <Button asChild className="font-display">
-                <Link to="/workout">⚔️ Iniciar Treino</Link>
+                <Link to="/workout">⚔️ Treinar</Link>
               </Button>
             </div>
           </CardContent>
@@ -134,22 +125,16 @@ export default function HomePage() {
       </motion.div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        {/* Ranking Friends */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-display flex items-center gap-2">
-                <Trophy className="h-4 w-4 text-primary" /> Ranking Amigos
+                <Trophy className="h-4 w-4 text-primary" /> Ranking
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               {mockRanking.slice(0, 5).map((entry) => (
-                <div
-                  key={entry.username}
-                  className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm ${
-                    entry.username === user.username ? 'bg-primary/10 border border-primary/20' : ''
-                  }`}
-                >
+                <div key={entry.username} className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm">
                   <span className="font-mono font-bold text-muted-foreground w-6">#{entry.rank}</span>
                   <div className="h-6 w-6 rounded-full bg-secondary flex items-center justify-center text-[10px] font-bold">
                     {entry.name.charAt(0)}
@@ -165,13 +150,10 @@ export default function HomePage() {
           </Card>
         </motion.div>
 
-        {/* Quest Log */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-display flex items-center gap-2">
-                📜 Quest Log
-              </CardTitle>
+              <CardTitle className="text-sm font-display flex items-center gap-2">📜 Quest Log</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               {mockFeed.slice(0, 5).map((activity) => {

@@ -10,11 +10,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 
-const feedTypeLabels: Record<string, { icon: string; text: (d: any) => string }> = {
+const feedTypeLabels: Record<string, { icon: string | ((d: any) => string); text: (d: any) => string }> = {
   workout_complete: { icon: '🏋️', text: (d) => `completou treino ${d.day} — ${d.volume}kg volume` },
   pr_broken: { icon: '🏆', text: (d) => `quebrou PR: ${d.exercise} ${d.weight}kg × ${d.reps}` },
   level_up: { icon: '⬆️', text: (d) => `subiu para Nível ${d.newLevel} — ${d.newClass}!` },
-  achievement: { icon: d => d.emoji, text: (d) => `desbloqueou: ${d.name}` },
+  achievement: { icon: (d: any) => d.emoji, text: (d) => `desbloqueou: ${d.name}` },
   cardio_complete: { icon: '🏃', text: (d) => `${d.type} — ${d.distance}km em ${d.duration}min` },
   diet_goal: { icon: '🥗', text: () => 'atingiu meta calórica do dia!' },
 };

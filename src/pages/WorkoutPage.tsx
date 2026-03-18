@@ -533,7 +533,7 @@ export default function WorkoutPage() {
 
       {/* Type Select Dialog (Avulso/Playlist) */}
       <Dialog open={showTypeSelect} onOpenChange={setShowTypeSelect}>
-        <DialogContent>
+        <DialogContent className="max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-display">Tipo de treino</DialogTitle>
           </DialogHeader>
@@ -544,13 +544,7 @@ export default function WorkoutPage() {
               <span className="text-xs text-muted-foreground">Adicione exercícios livremente</span>
             </Button>
             <Button variant="outline" className="h-auto p-6 flex-col gap-2" disabled={programs.length === 0}
-              onClick={() => {
-                if (programs.length > 0) {
-                  const prog = programs[0];
-                  const day = prog.workout_days?.[0];
-                  startWorkout('playlist', prog.id, day?.id);
-                }
-              }}>
+              onClick={() => {/* handled below via playlist selection */}}>
               <ListMusic className="h-8 w-8 text-primary" />
               <span className="font-display font-bold">Por Playlist</span>
               <span className="text-xs text-muted-foreground">
@@ -558,6 +552,42 @@ export default function WorkoutPage() {
               </span>
             </Button>
           </div>
+
+          {/* Playlist selector */}
+          {programs.length > 0 && (
+            <div className="space-y-2 mt-4 border-t border-border pt-4">
+              <p className="text-sm font-display font-medium">Escolha a playlist e o dia:</p>
+              {programs.map((prog: any) => (
+                <div key={prog.id} className="rounded-lg border border-border overflow-hidden">
+                  <div className="p-3 bg-secondary/30">
+                    <p className="font-medium text-sm flex items-center gap-2">
+                      <ListMusic className="h-4 w-4 text-primary" />
+                      {prog.name}
+                    </p>
+                  </div>
+                  <div className="divide-y divide-border">
+                    {(prog.workout_days || []).length === 0 ? (
+                      <p className="text-xs text-muted-foreground italic p-3">Nenhum dia cadastrado</p>
+                    ) : (
+                      (prog.workout_days || [])
+                        .sort((a: any, b: any) => a.order - b.order)
+                        .map((day: any) => (
+                          <Button
+                            key={day.id}
+                            variant="ghost"
+                            className="w-full justify-start rounded-none h-auto py-2.5 px-4"
+                            onClick={() => startWorkout('playlist', prog.id, day.id)}
+                          >
+                            <Dumbbell className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
+                            <span className="text-sm">{day.name}</span>
+                          </Button>
+                        ))
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 

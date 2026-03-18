@@ -62,6 +62,7 @@ export default function WorkoutPage() {
   const [activeExercises, setActiveExercises] = useState<ActiveExercise[]>([]);
   const [showExercisePicker, setShowExercisePicker] = useState(false);
   const [exerciseSearch, setExerciseSearch] = useState('');
+  const [equipmentFilter, setEquipmentFilter] = useState<string>('all');
   const [sessionTimer, setSessionTimer] = useState(0);
   
   // Rank up animation
@@ -321,10 +322,17 @@ export default function WorkoutPage() {
     return h > 0 ? `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}` : `${m}:${String(s).padStart(2, '0')}`;
   };
 
-  const filteredExercises = exercises.filter(e =>
-    e.name.toLowerCase().includes(exerciseSearch.toLowerCase()) ||
-    e.muscle_group.toLowerCase().includes(exerciseSearch.toLowerCase())
-  );
+  const EQUIPMENT_LABELS: Record<string, string> = {
+    all: 'Todos', maquina: 'Máquina', halter: 'Halter', barra: 'Barra',
+    cabo: 'Cabo', smith: 'Smith', peso_corpo: 'Corpo',
+  };
+
+  const filteredExercises = exercises.filter(e => {
+    const matchesSearch = e.name.toLowerCase().includes(exerciseSearch.toLowerCase()) ||
+      e.muscle_group.toLowerCase().includes(exerciseSearch.toLowerCase());
+    const matchesEquipment = equipmentFilter === 'all' || e.equipment === equipmentFilter;
+    return matchesSearch && matchesEquipment;
+  });
 
   // ---- ACTIVE SESSION VIEW ----
   if (activeSession) {
@@ -424,7 +432,7 @@ export default function WorkoutPage() {
         </Button>
 
         {/* Exercise Picker Dialog */}
-        <Dialog open={showExercisePicker} onOpenChange={setShowExercisePicker}>
+        <Dialog open={showExercisePicker} onOpenChange={(open) => { setShowExercisePicker(open); if (!open) { setEquipmentFilter('all'); setExerciseSearch(''); } }}>
           <DialogContent className="max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="font-display">Escolher Exercício</DialogTitle>
@@ -433,8 +441,21 @@ export default function WorkoutPage() {
               placeholder="Buscar exercício..."
               value={exerciseSearch}
               onChange={e => setExerciseSearch(e.target.value)}
-              className="mb-3"
+              className="mb-2"
             />
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              {Object.entries(EQUIPMENT_LABELS).map(([key, label]) => (
+                <Button
+                  key={key}
+                  size="sm"
+                  variant={equipmentFilter === key ? 'default' : 'outline'}
+                  className="h-7 text-xs px-2.5"
+                  onClick={() => setEquipmentFilter(key)}
+                >
+                  {label}
+                </Button>
+              ))}
+            </div>
             <div className="space-y-1 max-h-[50vh] overflow-y-auto">
               {filteredExercises.map(ex => (
                 <Button

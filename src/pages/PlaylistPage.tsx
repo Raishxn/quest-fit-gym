@@ -71,6 +71,7 @@ export default function PlaylistPage() {
   const [showAddExercise, setShowAddExercise] = useState(false);
   const [addExerciseDayId, setAddExerciseDayId] = useState<string | null>(null);
   const [exerciseSearch, setExerciseSearch] = useState('');
+  const [equipmentFilter, setEquipmentFilter] = useState<string>('all');
 
   // Show archived
   const [showArchived, setShowArchived] = useState(false);
@@ -347,10 +348,17 @@ export default function PlaylistPage() {
   const totalExercises = (playlist: Playlist) =>
     playlist.workout_days.reduce((sum, d) => sum + d.planned_exercises.length, 0);
 
-  const filteredExercises = exercises.filter(e =>
-    e.name.toLowerCase().includes(exerciseSearch.toLowerCase()) ||
-    e.muscle_group.toLowerCase().includes(exerciseSearch.toLowerCase())
-  );
+  const EQUIPMENT_LABELS: Record<string, string> = {
+    all: 'Todos', maquina: 'Máquina', halter: 'Halter', barra: 'Barra',
+    cabo: 'Cabo', smith: 'Smith', peso_corpo: 'Corpo',
+  };
+
+  const filteredExercises = exercises.filter(e => {
+    const matchesSearch = e.name.toLowerCase().includes(exerciseSearch.toLowerCase()) ||
+      e.muscle_group.toLowerCase().includes(exerciseSearch.toLowerCase());
+    const matchesEquipment = equipmentFilter === 'all' || e.equipment === equipmentFilter;
+    return matchesSearch && matchesEquipment;
+  });
 
   const activePlaylists = playlists.filter(p => !p.is_archived);
   const archivedPlaylists = playlists.filter(p => p.is_archived);
@@ -539,7 +547,7 @@ export default function PlaylistPage() {
         </Dialog>
 
         {/* Add Exercise Dialog */}
-        <Dialog open={showAddExercise} onOpenChange={setShowAddExercise}>
+        <Dialog open={showAddExercise} onOpenChange={(open) => { setShowAddExercise(open); if (!open) { setEquipmentFilter('all'); setExerciseSearch(''); } }}>
           <DialogContent className="max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="font-display">Adicionar Exercício</DialogTitle>
@@ -548,8 +556,21 @@ export default function PlaylistPage() {
               placeholder="Buscar exercício..."
               value={exerciseSearch}
               onChange={e => setExerciseSearch(e.target.value)}
-              className="mb-3"
+              className="mb-2"
             />
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              {Object.entries(EQUIPMENT_LABELS).map(([key, label]) => (
+                <Button
+                  key={key}
+                  size="sm"
+                  variant={equipmentFilter === key ? 'default' : 'outline'}
+                  className="h-7 text-xs px-2.5"
+                  onClick={() => setEquipmentFilter(key)}
+                >
+                  {label}
+                </Button>
+              ))}
+            </div>
             <div className="space-y-1 max-h-[50vh] overflow-y-auto">
               {filteredExercises.map(ex => (
                 <Button

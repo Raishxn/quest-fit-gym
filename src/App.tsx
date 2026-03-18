@@ -21,6 +21,11 @@ import ProgressPage from "./pages/ProgressPage";
 import SettingsPage from "./pages/SettingsPage";
 import UpgradePage from "./pages/UpgradePage";
 import NotFound from "./pages/NotFound";
+import MissionsPage from "./pages/MissionsPage";
+import GuildsPage from "./pages/GuildsPage";
+import UpdatesPage from "./pages/UpdatesPage";
+import TermsPage from "./pages/TermsPage";
+import PrivacyPage from "./pages/PrivacyPage";
 
 const queryClient = new QueryClient();
 
@@ -57,7 +62,12 @@ const App = () => (
               <Route path="/friends" element={<FriendsPage />} />
               <Route path="/playlists" element={<PlaylistPage />} />
               <Route path="/progress" element={<ProgressPage />} />
+              <Route path="/missions" element={<MissionsPage />} />
+              <Route path="/guilds" element={<GuildsPage />} />
               <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/updates" element={<UpdatesPage />} />
+              <Route path="/terms" element={<TermsPage />} />
+              <Route path="/privacy" element={<PrivacyPage />} />
             </Route>
 
             <Route path="/" element={<Navigate to="/home" replace />} />

@@ -1,4 +1,4 @@
-import { Home, Dumbbell, ListMusic, Salad, Activity, TrendingUp, Trophy, Users, User, Settings, Swords } from 'lucide-react';
+import { Home, Dumbbell, ListMusic, Salad, Activity, TrendingUp, Trophy, Users, User, Settings, Swords, Target, Shield } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -20,6 +20,8 @@ import {
 const navItems = [
   { title: 'Home', url: '/home', icon: Home },
   { title: 'Treino', url: '/workout', icon: Dumbbell },
+  { title: 'Missões', url: '/missions', icon: Target },
+  { title: 'Guildas', url: '/guilds', icon: Shield },
   { title: 'Playlists', url: '/playlists', icon: ListMusic },
   { title: 'Dieta', url: '/diet', icon: Salad },
   { title: 'Cardio', url: '/cardio', icon: Activity },

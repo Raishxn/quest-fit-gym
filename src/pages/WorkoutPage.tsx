@@ -248,6 +248,15 @@ export default function WorkoutPage() {
         });
       }
 
+      // Award Mastery Points (Rank index * 10)
+      const pmReward = newIdx * 10;
+      const { data: profileData } = await supabase.from('profiles').select('overall_mastery_points').eq('user_id', user.id).single();
+      if (profileData) {
+        await supabase.from('profiles').update({ 
+          overall_mastery_points: (profileData.overall_mastery_points || 0) + pmReward 
+        }).eq('user_id', user.id);
+      }
+
       setRankUpInfo({ exercise: exercise.name, oldRank: currentRank, newRank });
       setExerciseRanks(prev => {
         const filtered = prev.filter(r => r.exercise_id !== exercise.id);

@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { XPBar } from '@/components/rpg/XPBar';
 import { LevelBadge } from '@/components/rpg/LevelBadge';
 import { AttributeBars } from '@/components/rpg/AttributeBars';
+import { OverallRankBadge } from '@/components/rpg/OverallRankBadge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -62,6 +63,9 @@ export default function HomePage() {
               )}
             </div>
             <XPBar xp={profile.xp} level={profile.level} />
+            <div className="pt-4 border-t border-border/50 mt-4">
+              <OverallRankBadge pm={profile.overall_mastery_points || 0} />
+            </div>
           </CardContent>
         </Card>
       </motion.div>

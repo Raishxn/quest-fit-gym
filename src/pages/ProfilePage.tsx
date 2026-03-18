@@ -7,6 +7,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { XPBar } from '@/components/rpg/XPBar';
 import { LevelBadge } from '@/components/rpg/LevelBadge';
 import { AttributeBars } from '@/components/rpg/AttributeBars';
+import { OverallRankBadge } from '@/components/rpg/OverallRankBadge';
+import { TitleSelector } from '@/components/rpg/TitleSelector';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
@@ -105,7 +107,10 @@ export default function ProfilePage() {
                 <h1 className="text-2xl font-display font-bold">{profile.name}</h1>
                 <p className="text-sm text-muted-foreground">@{profile.username}</p>
                 {profile.bio && <p className="text-sm mt-1">{profile.bio}</p>}
-                <p className="text-xs text-muted-foreground mt-1">
+                <div className="mt-2">
+                   <TitleSelector currentTitleId={profile.selected_title_id} onTitleChange={refreshProfile} />
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
                   <Users className="inline h-3 w-3 mr-1" />{friends.length} amigos
                 </p>
               </div>
@@ -114,6 +119,10 @@ export default function ProfilePage() {
             <XPBar xp={profile.xp} level={profile.level} />
           </CardContent>
         </Card>
+      </motion.div>
+
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
+         <OverallRankBadge pm={profile.overall_mastery_points || 0} />
       </motion.div>
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>

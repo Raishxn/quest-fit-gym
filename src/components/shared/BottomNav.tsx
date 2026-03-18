@@ -1,10 +1,12 @@
-import { Home, Dumbbell, Salad, Trophy, User } from 'lucide-react';
+import { Home, Dumbbell, Salad, Trophy, User, Target, Shield } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { cn } from '@/lib/utils';
 
 const items = [
   { title: 'Home', url: '/home', icon: Home },
   { title: 'Treino', url: '/workout', icon: Dumbbell },
+  { title: 'Missões', url: '/missions', icon: Target },
+  { title: 'Guildas', url: '/guilds', icon: Shield },
   { title: 'Dieta', url: '/diet', icon: Salad },
   { title: 'Ranking', url: '/ranking', icon: Trophy },
   { title: 'Perfil', url: '/profile', icon: User },

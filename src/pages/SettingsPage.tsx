@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
-import { Settings, User, Palette, Dumbbell, Bell, Shield, CreditCard } from 'lucide-react';
+import { Settings, User, Palette, Dumbbell, Bell, Shield, CreditCard, Info } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -29,6 +30,7 @@ export default function SettingsPage() {
           <TabsTrigger value="notifications" className="font-display text-xs"><Bell className="h-3 w-3 mr-1" />Notificações</TabsTrigger>
           <TabsTrigger value="privacy" className="font-display text-xs"><Shield className="h-3 w-3 mr-1" />Privacidade</TabsTrigger>
           <TabsTrigger value="plan" className="font-display text-xs"><CreditCard className="h-3 w-3 mr-1" />Plano</TabsTrigger>
+          <TabsTrigger value="about" className="font-display text-xs"><Info className="h-3 w-3 mr-1" />Sobre</TabsTrigger>
         </TabsList>
 
         <TabsContent value="account">
@@ -116,6 +118,18 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
         </TabsContent>
+        <TabsContent value="about">
+          <Card>
+            <CardHeader><CardTitle className="font-display">Quest Fit</CardTitle></CardHeader>
+            <CardContent className="space-y-4 flex flex-col items-start">
+              <p className="text-sm text-muted-foreground mb-2">Versão 1.0.0 Alpha</p>
+              <Button variant="link" asChild className="p-0 h-auto text-primary text-sm font-medium"><Link to="/updates">Atualizações (Patch Notes)</Link></Button>
+              <Button variant="link" asChild className="p-0 h-auto text-primary text-sm font-medium"><Link to="/terms">Termos de Uso</Link></Button>
+              <Button variant="link" asChild className="p-0 h-auto text-primary text-sm font-medium"><Link to="/privacy">Política de Privacidade</Link></Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
       </Tabs>
     </div>
   );

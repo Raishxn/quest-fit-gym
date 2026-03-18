@@ -24,6 +24,9 @@ export interface UserProfile {
   streak: number;
   plan: 'free' | 'vip' | 'vip_plus' | 'pro';
   anamnesisComplete: boolean;
+  overall_rank?: string;
+  overall_mastery_points?: number;
+  selected_title_id?: string | null;
 }
 
 export interface Achievement {

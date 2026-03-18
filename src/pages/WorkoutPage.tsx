@@ -327,10 +327,20 @@ export default function WorkoutPage() {
     cabo: 'Cabo', smith: 'Smith', peso_corpo: 'Corpo',
   };
 
+  const EQUIPMENT_ALIASES: Record<string, string[]> = {
+    maquina: ['maquina', 'machine', 'Machine'],
+    halter: ['halter', 'dumbbell', 'Dumbbell'],
+    barra: ['barra', 'barbell', 'Barbell', 'bar'],
+    cabo: ['cabo', 'cable', 'Cable'],
+    smith: ['smith', 'smith_machine', 'Smith'],
+    peso_corpo: ['peso_corpo', 'bodyweight', 'Bodyweight', 'body_weight', 'none'],
+  };
+
   const filteredExercises = exercises.filter(e => {
     const matchesSearch = e.name.toLowerCase().includes(exerciseSearch.toLowerCase()) ||
       e.muscle_group.toLowerCase().includes(exerciseSearch.toLowerCase());
-    const matchesEquipment = equipmentFilter === 'all' || e.equipment === equipmentFilter;
+    const matchesEquipment = equipmentFilter === 'all' ||
+      (EQUIPMENT_ALIASES[equipmentFilter]?.includes(e.equipment) ?? e.equipment === equipmentFilter);
     return matchesSearch && matchesEquipment;
   });
 

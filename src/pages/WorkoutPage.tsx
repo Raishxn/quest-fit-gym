@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { getRankTier, getNextRankInfo, getRankProgress, calculateRank, EXERCISE_RANK_CRITERIA, RANK_UP_MESSAGES } from '@/lib/exercise-ranks';
+import { PartyLobbyDialog } from '@/components/party/PartyLobbyDialog';
 import { toast } from 'sonner';
 
 interface WorkoutSession {
@@ -54,7 +55,9 @@ export default function WorkoutPage() {
   // Workout flow state
   const [showModeSelect, setShowModeSelect] = useState(false);
   const [showTypeSelect, setShowTypeSelect] = useState(false);
+  const [showPartyLobby, setShowPartyLobby] = useState(false);
   const [selectedMode, setSelectedMode] = useState<'solo' | 'party'>('solo');
+  const [partyId, setPartyId] = useState<string | null>(null);
   
   // Active session state
   const [activeSession, setActiveSession] = useState<WorkoutSession | null>(null);
@@ -143,6 +146,27 @@ export default function WorkoutPage() {
     setActiveSession(data as WorkoutSession);
     setActiveExercises([]);
     toast.success('⚔️ Treino iniciado! Hora de conquistar!');
+  };
+
+  const startPartySession = async (pid: string) => {
+    setPartyId(pid);
+    setShowPartyLobby(false);
+    
+    // check if have active session
+    const { data: activeChecks } = await supabase.from('workout_sessions').select('*').eq('user_id', user!.id).eq('status', 'active');
+    
+    if (activeChecks && activeChecks.length > 0) {
+      toast('Retomando seu treino ativo...');
+      setActiveSession(activeChecks[0] as WorkoutSession);
+    } else {
+      const { data, error } = await supabase.from('workout_sessions').insert({
+        user_id: user!.id,
+        status: 'active' as const,
+      }).select().single();
+      
+      if (error) toast.error('Erro ao criar sessão');
+      else setActiveSession(data as WorkoutSession);
+    }
   };
 
   const addExerciseToSession = async (exercise: ExerciseOption) => {
@@ -375,6 +399,14 @@ export default function WorkoutPage() {
           </Card>
         </motion.div>
 
+        {partyId && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            <div className="bg-primary/10 border border-primary/20 p-2 rounded-lg text-center text-xs text-primary font-bold flex items-center justify-center gap-2">
+              <Users className="w-4 h-4" /> Party Ativa! (Seus amigos também estão treinando)
+            </div>
+          </motion.div>
+        )}
+
         {/* Active Exercises */}
         {activeExercises.map((ae, exIdx) => {
           const rank = exerciseRanks.find(r => r.exercise_id === ae.exercise.id);
@@ -590,14 +622,17 @@ export default function WorkoutPage() {
               <span className="font-display font-bold">Solo</span>
               <span className="text-xs text-muted-foreground">Treino individual</span>
             </Button>
-            <Button variant="outline" className="h-auto p-6 flex-col gap-2 opacity-50" disabled>
-              <Users className="h-8 w-8 text-muted-foreground" />
+            <Button variant="outline" className="h-auto p-6 flex-col gap-2" onClick={() => { setSelectedMode('party'); setShowModeSelect(false); setShowPartyLobby(true); }}>
+              <Users className="h-8 w-8 text-primary" />
               <span className="font-display font-bold">Party</span>
-              <span className="text-xs text-muted-foreground">Em breve — treine com amigos!</span>
+              <span className="text-xs text-muted-foreground">Treine com amigos</span>
             </Button>
           </div>
         </DialogContent>
       </Dialog>
+      
+      {/* Party Lobby Dialog */}
+      <PartyLobbyDialog open={showPartyLobby} onOpenChange={setShowPartyLobby} onStartPartyWorkout={startPartySession} />
 
       {/* Type Select Dialog (Avulso/Playlist) */}
       <Dialog open={showTypeSelect} onOpenChange={setShowTypeSelect}>

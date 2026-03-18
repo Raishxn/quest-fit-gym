@@ -71,7 +71,7 @@ export default function SettingsPage() {
                 <div className="space-y-2"><Label>Gordura (g)</Label><Input type="number" defaultValue="67" /></div>
                 <div className="space-y-2"><Label>Carboidratos (g)</Label><Input type="number" defaultValue="290" /></div>
               </div>
-              <Button variant="outline" className="font-display">🧠 Refazer Anamnese</Button>
+              <Button variant="outline" className="font-display" asChild><Link to="/anamnesis">🧠 Refazer Anamnese</Link></Button>
             </CardContent>
           </Card>
         </TabsContent>

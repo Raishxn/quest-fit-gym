@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { MISSION_TEMPLATES } from './mission-templates-seed';
 import type { Database } from '@/integrations/supabase/types';
 
 export type MissionTemplate = Database['public']['Tables']['mission_templates']['Row'];
@@ -90,6 +91,14 @@ export const fetchGlobalMissions = async () => {
  * In a real app this would be an Edge Function running on cron.
  */
 export const checkAndGenerateDailyMissions = async (userId: string) => {
+  // Auto-Seed Protocol: Se o banco estiver vazio, alimentar com as missões de base
+  const { count } = await supabase.from('mission_templates').select('*', { count: 'exact', head: true });
+  if (count === 0) {
+     console.log('Banco de missões vazio. Iniciando Auto-Seeding...');
+     const { error: seedErr } = await supabase.from('mission_templates').upsert(MISSION_TEMPLATES);
+     if (seedErr) console.error("Erro no auto-seed das missões:", seedErr);
+  }
+
   // Check if they have any active daily missions
   const { data: existing } = await supabase
     .from('active_missions')
@@ -114,7 +123,7 @@ export const checkAndGenerateDailyMissions = async (userId: string) => {
     user_id: userId,
     template_id: t.id,
     type: 'daily',
-    target: t.criteria?.count || 1,
+    target: (t.criteria as any)?.count || 1,
     progress: 0,
     status: 'pending'
   }));

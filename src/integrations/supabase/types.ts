@@ -257,6 +257,44 @@ export type Database = {
           },
         ]
       }
+      exercise_ranks: {
+        Row: {
+          best_reps: number
+          best_weight_kg: number
+          current_rank: string
+          exercise_id: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          best_reps?: number
+          best_weight_kg?: number
+          current_rank?: string
+          exercise_id: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          best_reps?: number
+          best_weight_kg?: number
+          current_rank?: string
+          exercise_id?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exercise_ranks_exercise_id_fkey"
+            columns: ["exercise_id"]
+            isOneToOne: false
+            referencedRelation: "exercises"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exercises: {
         Row: {
           created_at: string

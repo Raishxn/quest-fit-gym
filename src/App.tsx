@@ -17,6 +17,7 @@ import RankingPage from "./pages/RankingPage";
 import ProfilePage from "./pages/ProfilePage";
 import FriendsPage from "./pages/FriendsPage";
 import PlaylistPage from "./pages/PlaylistPage";
+import ProgressPage from "./pages/ProgressPage";
 import SettingsPage from "./pages/SettingsPage";
 import UpgradePage from "./pages/UpgradePage";
 import NotFound from "./pages/NotFound";
@@ -55,6 +56,7 @@ const App = () => (
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/friends" element={<FriendsPage />} />
               <Route path="/playlists" element={<PlaylistPage />} />
+              <Route path="/progress" element={<ProgressPage />} />
               <Route path="/settings" element={<SettingsPage />} />
             </Route>
 

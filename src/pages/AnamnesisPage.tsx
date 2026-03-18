@@ -60,9 +60,17 @@ export default function AnamnesisPage() {
 
     const weightKg = parseFloat(weight);
     const heightCm = parseFloat(height);
+    const heightM = heightCm / 100;
     const age = Math.floor((Date.now() - new Date(birthDate).getTime()) / (365.25 * 24 * 60 * 60 * 1000));
 
-    // BMR Mifflin-St Jeor
+    // BMI calculation
+    const bmi = weightKg / (heightM * heightM);
+    const bmiCategory = bmi < 18.5 ? 'Abaixo' : bmi < 25 ? 'Normal' : bmi < 30 ? 'Sobrepeso' : 'Obesidade';
+
+    // Lean mass = BMI threshold (24.9) × height² — upper limit of "Normal"
+    const leanWeight = Math.min(weightKg, 24.9 * heightM * heightM);
+
+    // BMR Mifflin-St Jeor (uses actual weight for metabolic rate)
     const bmr = sex === 'male'
       ? 10 * weightKg + 6.25 * heightCm - 5 * age + 5
       : 10 * weightKg + 6.25 * heightCm - 5 * age - 161;
@@ -73,15 +81,17 @@ export default function AnamnesisPage() {
     const goalMultiplier = selectedGoal === 'fat_loss' ? 0.8 : selectedGoal === 'muscle_gain' ? 1.1 : 1.0;
     const targetCalories = tdee * goalMultiplier;
 
-    const proteinMultiplier = (selectedGoal === 'fat_loss' || selectedGoal === 'muscle_gain') ? 2 : 1.6;
-    const targetProtein = proteinMultiplier * weightKg;
-    const targetFat = (targetCalories * 0.25) / 9;
-    const targetCarbs = (targetCalories - (targetProtein * 4) - (targetFat * 9)) / 4;
+    // Macros based on LEAN MASS (not current weight)
+    // Protein: leanWeight × 2 (male) or × 1.6 (female)
+    const targetProtein = sex === 'male' ? leanWeight * 2 : leanWeight * 1.6;
+    // Fat: leanWeight in grams
+    const targetFat = leanWeight;
+    // Indispensable calories: (protein × 4) + (fat × 9)
+    const indispensableCals = (targetProtein * 4) + (targetFat * 9);
+    // Remaining calories from carbs
+    const remainingCals = Math.max(0, targetCalories - indispensableCals);
+    const targetCarbs = remainingCals / 4;
     const targetWater = 35 * weightKg;
-
-    const heightM = heightCm / 100;
-    const bmi = weightKg / (heightM * heightM);
-    const bmiCategory = bmi < 18.5 ? 'Abaixo' : bmi < 25 ? 'Normal' : bmi < 30 ? 'Sobrepeso' : 'Obesidade';
 
     const { error: anamError } = await supabase.from('anamnesis').upsert({
       user_id: user.id,

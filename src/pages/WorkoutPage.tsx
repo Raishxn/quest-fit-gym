@@ -194,7 +194,7 @@ export default function WorkoutPage() {
     ));
   };
 
-  const updateSet = async (exerciseIdx: number, setIdx: number, field: 'weight_kg' | 'reps', value: number) => {
+  const updateSet = async (exerciseIdx: number, setIdx: number, field: 'weight_kg' | 'reps' | 'type', value: number | string) => {
     setActiveExercises(prev => prev.map((e, i) =>
       i === exerciseIdx ? {
         ...e,
@@ -209,7 +209,7 @@ export default function WorkoutPage() {
     if (!ae || !set) return;
 
     await supabase.from('set_logs')
-      .update({ weight_kg: set.weight_kg, reps: set.reps })
+      .update({ weight_kg: set.weight_kg, reps: set.reps, type: set.type })
       .eq('exercise_log_id', ae.exerciseLogId)
       .eq('set_number', set.set_number);
 
@@ -403,33 +403,61 @@ export default function WorkoutPage() {
                 <CardContent className="space-y-2">
                   {/* Set Headers */}
                   {ae.sets.length > 0 && (
-                    <div className="grid grid-cols-[40px_1fr_1fr_40px] gap-2 text-[10px] text-muted-foreground font-mono">
-                      <span>Série</span><span>Peso (kg)</span><span>Reps</span><span></span>
+                    <div className="grid grid-cols-[32px_60px_1fr_1fr_32px] gap-1.5 text-[10px] text-muted-foreground font-mono">
+                      <span>Série</span><span>Tipo</span><span>Peso (kg)</span><span>Reps</span><span></span>
                     </div>
                   )}
-                  {ae.sets.map((set, setIdx) => (
-                    <div key={setIdx} className="grid grid-cols-[40px_1fr_1fr_40px] gap-2 items-center">
-                      <span className="font-mono text-xs text-muted-foreground text-center">{set.set_number}</span>
-                      <Input
-                        type="number"
-                        value={set.weight_kg}
-                        onChange={e => updateSet(exIdx, setIdx, 'weight_kg', Number(e.target.value))}
-                        onBlur={() => saveSetToDb(exIdx, setIdx)}
-                        className="h-8 font-mono text-sm"
-                      />
-                      <Input
-                        type="number"
-                        value={set.reps}
-                        onChange={e => updateSet(exIdx, setIdx, 'reps', Number(e.target.value))}
-                        onBlur={() => saveSetToDb(exIdx, setIdx)}
-                        className="h-8 font-mono text-sm"
-                      />
-                      <Check className="h-4 w-4 text-success mx-auto" />
-                    </div>
-                  ))}
-                  <Button variant="outline" size="sm" className="w-full" onClick={() => addSet(exIdx)}>
-                    <Plus className="h-3 w-3 mr-1" /> Série
-                  </Button>
+                  {ae.sets.map((set, setIdx) => {
+                    const typeColors: Record<string, string> = { warmup: 'text-yellow-500 bg-yellow-500/10', working: 'text-primary bg-primary/10', backoff: 'text-orange-400 bg-orange-400/10' };
+                    const typeLabels: Record<string, string> = { warmup: 'W', working: 'T', backoff: 'B' };
+                    const typeTitles: Record<string, string> = { warmup: 'Preparação', working: 'Trabalho', backoff: 'Backoff' };
+                    const cycleType = () => {
+                      const order: Array<'warmup' | 'working' | 'backoff'> = ['warmup', 'working', 'backoff'];
+                      const nextIdx = (order.indexOf(set.type) + 1) % order.length;
+                      const newType = order[nextIdx];
+                      // If changing to backoff, suggest 75% of last working set weight
+                      if (newType === 'backoff') {
+                        const lastWorking = ae.sets.filter(s => s.type === 'working').pop();
+                        if (lastWorking) {
+                          const backoffWeight = Math.round(lastWorking.weight_kg * 0.75);
+                          updateSet(exIdx, setIdx, 'weight_kg', backoffWeight);
+                        }
+                      }
+                      updateSet(exIdx, setIdx, 'type', newType);
+                    };
+                    return (
+                      <div key={setIdx} className="grid grid-cols-[32px_60px_1fr_1fr_32px] gap-1.5 items-center">
+                        <span className="font-mono text-xs text-muted-foreground text-center">{set.set_number}</span>
+                        <button
+                          onClick={cycleType}
+                          className={`h-7 rounded text-[10px] font-bold ${typeColors[set.type] || typeColors.working}`}
+                          title={typeTitles[set.type] || 'Trabalho'}
+                        >
+                          {typeLabels[set.type] || 'T'}
+                        </button>
+                        <Input
+                          type="number"
+                          value={set.weight_kg}
+                          onChange={e => updateSet(exIdx, setIdx, 'weight_kg', Number(e.target.value))}
+                          onBlur={() => saveSetToDb(exIdx, setIdx)}
+                          className="h-8 font-mono text-sm"
+                        />
+                        <Input
+                          type="number"
+                          value={set.reps}
+                          onChange={e => updateSet(exIdx, setIdx, 'reps', Number(e.target.value))}
+                          onBlur={() => saveSetToDb(exIdx, setIdx)}
+                          className="h-8 font-mono text-sm"
+                        />
+                        <Check className="h-4 w-4 text-success mx-auto" />
+                      </div>
+                    );
+                  })}
+                  <div className="flex gap-1.5">
+                    <Button variant="outline" size="sm" className="flex-1" onClick={() => addSet(exIdx)}>
+                      <Plus className="h-3 w-3 mr-1" /> Série
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>

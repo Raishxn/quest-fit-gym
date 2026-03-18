@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Salad, Droplets, Plus, Coffee, Sun, Apple, Moon, Sparkles, Dumbbell, Search } from 'lucide-react';
+import { Salad, Droplets, Plus, Coffee, Sun, Apple, Moon, Sparkles, Dumbbell, Search, X, PlusCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
@@ -32,6 +32,10 @@ export default function DietPage() {
   const [foods, setFoods] = useState<any[]>([]);
   const [selectedFood, setSelectedFood] = useState<any>(null);
   const [quantity, setQuantity] = useState(100);
+
+  // Custom food registration
+  const [showCustomFood, setShowCustomFood] = useState(false);
+  const [customFood, setCustomFood] = useState({ name: '', calories: '', protein: '', carbs: '', fat: '', fiber: '' });
 
   const today = new Date().toISOString().slice(0, 10);
 
@@ -140,6 +144,37 @@ export default function DietPage() {
     loadDietData();
   };
 
+  const removeMealItem = async (item: any) => {
+    if (!dietDay) return;
+    await supabase.from('meal_items').delete().eq('id', item.id);
+    // Update diet day totals
+    await supabase.from('diet_days').update({
+      total_calories: Math.max(0, (dietDay.total_calories || 0) - (item.calories || 0)),
+      total_protein_g: Math.max(0, (dietDay.total_protein_g || 0) - (item.protein_g || 0)),
+      total_carbs_g: Math.max(0, (dietDay.total_carbs_g || 0) - (item.carbs_g || 0)),
+      total_fat_g: Math.max(0, (dietDay.total_fat_g || 0) - (item.fat_g || 0)),
+      total_fiber_g: Math.max(0, (dietDay.total_fiber_g || 0) - (item.fiber_g || 0)),
+    }).eq('id', dietDay.id);
+    toast.success('Item removido');
+    loadDietData();
+  };
+
+  const addCustomFood = async () => {
+    if (!customFood.name.trim()) return;
+    const { error } = await supabase.from('foods').insert({
+      name: customFood.name.trim(),
+      calories_per_100g: Number(customFood.calories) || 0,
+      protein_per_100g: Number(customFood.protein) || 0,
+      carbs_per_100g: Number(customFood.carbs) || 0,
+      fat_per_100g: Number(customFood.fat) || 0,
+      fiber_per_100g: Number(customFood.fiber) || 0,
+    });
+    if (error) { toast.error('Erro ao cadastrar alimento'); return; }
+    toast.success(`${customFood.name} cadastrado!`);
+    setCustomFood({ name: '', calories: '', protein: '', carbs: '', fat: '', fiber: '' });
+    setShowCustomFood(false);
+  };
+
   const addWater = async (ml: number) => {
     if (!dietDay || !user) return;
     const newTotal = (dietDay.total_water_ml || 0) + ml;
@@ -244,13 +279,21 @@ export default function DietPage() {
                 {items.length > 0 ? (
                   <CardContent className="space-y-1">
                     {items.map((item: any) => (
-                      <div key={item.id} className="flex items-center justify-between text-sm py-1 border-b border-border/50 last:border-0">
+                      <div key={item.id} className="flex items-center justify-between text-sm py-1 border-b border-border/50 last:border-0 group">
                         <div>
                           <span className="font-medium">{item.foods?.name || 'Alimento'}</span>
                           <span className="text-xs text-muted-foreground ml-2">{item.quantity_g}g</span>
                         </div>
-                        <div className="font-mono text-xs text-muted-foreground">
-                          {item.calories}kcal • {item.protein_g}g prot
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-xs text-muted-foreground">
+                            {item.calories}kcal • {item.protein_g}g prot
+                          </span>
+                          <button
+                            onClick={() => removeMealItem(item)}
+                            className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </button>
                         </div>
                       </div>
                     ))}
@@ -279,7 +322,7 @@ export default function DietPage() {
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input placeholder="Buscar alimento..." value={foodSearch} onChange={e => searchFoods(e.target.value)} className="pl-9" />
               </div>
-              <div className="space-y-1 max-h-[40vh] overflow-y-auto">
+            <div className="space-y-1 max-h-[40vh] overflow-y-auto">
                 {foods.length === 0 && foodSearch.length >= 2 && (
                   <p className="text-sm text-muted-foreground text-center py-4">Nenhum alimento encontrado</p>
                 )}
@@ -294,6 +337,9 @@ export default function DietPage() {
                   </Button>
                 ))}
               </div>
+              <Button variant="outline" className="w-full mt-2" onClick={() => { setShowFoodSearch(false); setShowCustomFood(true); }}>
+                <PlusCircle className="h-4 w-4 mr-2" /> Cadastrar novo alimento
+              </Button>
             </>
           ) : (
             <div className="space-y-4">
@@ -317,6 +363,33 @@ export default function DietPage() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Custom Food Dialog */}
+      <Dialog open={showCustomFood} onOpenChange={setShowCustomFood}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="font-display">Cadastrar Alimento</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label>Nome do alimento *</Label>
+              <Input placeholder="Ex: Whey Protein Gold Standard" value={customFood.name} onChange={e => setCustomFood({...customFood, name: e.target.value})} />
+            </div>
+            <p className="text-xs text-muted-foreground font-mono">Valores por 100g:</p>
+            <div className="grid grid-cols-2 gap-3">
+              <div><Label>Calorias (kcal)</Label><Input type="number" placeholder="120" value={customFood.calories} onChange={e => setCustomFood({...customFood, calories: e.target.value})} /></div>
+              <div><Label>Proteína (g)</Label><Input type="number" placeholder="24" value={customFood.protein} onChange={e => setCustomFood({...customFood, protein: e.target.value})} /></div>
+              <div><Label>Carbs (g)</Label><Input type="number" placeholder="5" value={customFood.carbs} onChange={e => setCustomFood({...customFood, carbs: e.target.value})} /></div>
+              <div><Label>Gordura (g)</Label><Input type="number" placeholder="2" value={customFood.fat} onChange={e => setCustomFood({...customFood, fat: e.target.value})} /></div>
+              <div><Label>Fibra (g)</Label><Input type="number" placeholder="0" value={customFood.fiber} onChange={e => setCustomFood({...customFood, fiber: e.target.value})} /></div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCustomFood(false)}>Cancelar</Button>
+            <Button onClick={addCustomFood} disabled={!customFood.name.trim()}>Cadastrar</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

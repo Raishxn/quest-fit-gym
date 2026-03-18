@@ -1,31 +1,42 @@
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Flame, Dumbbell, Salad, Swords } from 'lucide-react';
+import { Flame, Dumbbell, Salad, Swords, Trophy } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { XPBar } from '@/components/rpg/XPBar';
 import { LevelBadge } from '@/components/rpg/LevelBadge';
 import { AttributeBars } from '@/components/rpg/AttributeBars';
-import { mockDietToday, mockRanking, mockFeed } from '@/lib/mock-data';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Trophy } from 'lucide-react';
-
-const feedTypeLabels: Record<string, { icon: string | ((d: any) => string); text: (d: any) => string }> = {
-  workout_complete: { icon: '🏋️', text: (d) => `completou treino ${d.day} — ${d.volume}kg volume` },
-  pr_broken: { icon: '🏆', text: (d) => `quebrou PR: ${d.exercise} ${d.weight}kg × ${d.reps}` },
-  level_up: { icon: '⬆️', text: (d) => `subiu para Nível ${d.newLevel} — ${d.newClass}!` },
-  achievement: { icon: (d: any) => d.emoji, text: (d) => `desbloqueou: ${d.name}` },
-  cardio_complete: { icon: '🏃', text: (d) => `${d.type} — ${d.distance}km em ${d.duration}min` },
-  diet_goal: { icon: '🥗', text: () => 'atingiu meta calórica do dia!' },
-};
 
 export default function HomePage() {
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
+  const [dietToday, setDietToday] = useState<any>(null);
+  const [ranking, setRanking] = useState<any[]>([]);
+  const [recentActivity, setRecentActivity] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (!user) return;
+    const today = new Date().toISOString().slice(0, 10);
+
+    // Fetch today's diet
+    supabase.from('diet_days').select('*').eq('user_id', user.id).eq('date', today).maybeSingle()
+      .then(({ data }) => setDietToday(data));
+
+    // Fetch top 5 by XP for ranking preview
+    supabase.from('profiles').select('username, name, xp, level, class_name, avatar_url').order('xp', { ascending: false }).limit(5)
+      .then(({ data }) => setRanking(data || []));
+
+    // Fetch recent feed activities
+    supabase.from('feed_activities').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(5)
+      .then(({ data }) => setRecentActivity(data || []));
+  }, [user]);
+
   if (!profile) return null;
 
-  const diet = mockDietToday;
-  const calPercent = Math.min(100, (diet.totalCalories / diet.targetCalories) * 100);
+  const calPercent = dietToday ? Math.min(100, (dietToday.total_calories / (dietToday.total_calories + 1)) * 100) : 0;
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
@@ -77,16 +88,19 @@ export default function HomePage() {
                 <span className="text-sm font-medium flex items-center gap-1">
                   <Salad className="h-4 w-4 text-attr-vit" /> Calorias Hoje
                 </span>
-                <span className="font-mono text-xs text-muted-foreground">
-                  {diet.totalCalories} / {diet.targetCalories} kcal
-                </span>
+                {dietToday ? (
+                  <span className="font-mono text-xs text-muted-foreground">
+                    {dietToday.total_calories} kcal
+                  </span>
+                ) : (
+                  <span className="font-mono text-xs text-muted-foreground">Sem registro</span>
+                )}
               </div>
-              <Progress value={calPercent} className="h-3" />
-              <div className="flex justify-between text-[10px] font-mono text-muted-foreground">
-                <span>P: {diet.totalProteinG}g/{diet.targetProteinG}g</span>
-                <span>G: {diet.totalFatG}g/{diet.targetFatG}g</span>
-                <span>C: {diet.totalCarbsG}g/{diet.targetCarbsG}g</span>
-              </div>
+              {dietToday ? (
+                <Progress value={calPercent} className="h-3" />
+              ) : (
+                <p className="text-xs text-muted-foreground italic">Registre sua primeira refeição na aba Dieta!</p>
+              )}
             </CardContent>
           </Card>
         </motion.div>
@@ -133,16 +147,20 @@ export default function HomePage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              {mockRanking.slice(0, 5).map((entry) => (
-                <div key={entry.username} className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm">
-                  <span className="font-mono font-bold text-muted-foreground w-6">#{entry.rank}</span>
-                  <div className="h-6 w-6 rounded-full bg-secondary flex items-center justify-center text-[10px] font-bold">
-                    {entry.name.charAt(0)}
+              {ranking.length === 0 ? (
+                <p className="text-sm text-muted-foreground italic text-center py-4">Nenhum guerreiro no ranking ainda.</p>
+              ) : (
+                ranking.map((entry, idx) => (
+                  <div key={entry.username || idx} className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm">
+                    <span className="font-mono font-bold text-muted-foreground w-6">#{idx + 1}</span>
+                    <div className="h-6 w-6 rounded-full bg-secondary flex items-center justify-center text-[10px] font-bold">
+                      {entry.name?.charAt(0) || '?'}
+                    </div>
+                    <span className="flex-1 truncate font-medium">{entry.name}</span>
+                    <span className="font-mono text-xs text-muted-foreground">{entry.xp?.toLocaleString()} XP</span>
                   </div>
-                  <span className="flex-1 truncate font-medium">{entry.name}</span>
-                  <span className="font-mono text-xs text-muted-foreground">{entry.xp.toLocaleString()} XP</span>
-                </div>
-              ))}
+                ))
+              )}
               <Button variant="ghost" size="sm" asChild className="w-full">
                 <Link to="/ranking">Ver ranking completo →</Link>
               </Button>
@@ -156,29 +174,26 @@ export default function HomePage() {
               <CardTitle className="text-sm font-display flex items-center gap-2">📜 Quest Log</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {mockFeed.slice(0, 5).map((activity) => {
-                const config = feedTypeLabels[activity.type];
-                return (
+              {recentActivity.length === 0 ? (
+                <div className="text-center py-6 space-y-2">
+                  <p className="text-2xl">📜</p>
+                  <p className="text-sm text-muted-foreground italic">
+                    Nenhuma quest registrada ainda — comece sua jornada, aventureiro!
+                  </p>
+                </div>
+              ) : (
+                recentActivity.map((activity) => (
                   <div key={activity.id} className="flex items-start gap-2 text-sm">
-                    <span className="text-base shrink-0">
-                      {typeof config.icon === 'function' ? config.icon(activity.data) : config.icon}
-                    </span>
+                    <span className="text-base shrink-0">⚔️</span>
                     <div className="flex-1 min-w-0">
-                      <p>
-                        <span className="font-medium">{activity.name}</span>{' '}
-                        <span className="text-muted-foreground">{config.text(activity.data)}</span>
+                      <p className="text-muted-foreground">{activity.type}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(activity.created_at).toLocaleDateString('pt-BR')}
                       </p>
-                      <div className="flex gap-2 mt-1">
-                        {activity.reactions.map((r) => (
-                          <span key={r.emoji} className="text-xs bg-secondary rounded-full px-2 py-0.5">
-                            {r.emoji} {r.count}
-                          </span>
-                        ))}
-                      </div>
                     </div>
                   </div>
-                );
-              })}
+                ))
+              )}
             </CardContent>
           </Card>
         </motion.div>

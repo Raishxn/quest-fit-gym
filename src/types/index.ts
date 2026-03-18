@@ -36,6 +36,8 @@ export interface UserProfile {
     bonus_value: number;
     icon_emoji: string;
   } | null;
+  role?: 'user' | 'admin';
+  has_seen_tutorial?: boolean;
 }
 
 export interface Achievement {

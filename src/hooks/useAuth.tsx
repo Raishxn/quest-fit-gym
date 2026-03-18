@@ -29,11 +29,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = async (userId: string) => {
-    const { data } = (await supabase
+    let { data, error } = (await supabase
       .from('profiles')
       .select('*, classes(*)')
       .eq('user_id', userId)
       .single()) as any;
+      
+    if (error) {
+      console.error("Profile fetch error with join, falling back to simple fetch:", error);
+      const fallback = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+      data = fallback.data;
+    }
 
     if (data) {
       const p: UserProfile = {
@@ -65,6 +75,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           bonus_value: data.classes.bonus_value,
           icon_emoji: data.classes.icon_emoji,
         } : null,
+        role: data.role || 'user',
+        has_seen_tutorial: data.has_seen_tutorial || false,
       };
       setProfile(p);
 

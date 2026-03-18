@@ -52,6 +52,7 @@ const App = () => (
               <Route path="/cardio" element={<CardioPage />} />
               <Route path="/ranking" element={<RankingPage />} />
               <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/friends" element={<FriendsPage />} />
               <Route path="/settings" element={<SettingsPage />} />
             </Route>
 

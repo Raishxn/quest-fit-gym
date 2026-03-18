@@ -15,6 +15,7 @@ import DietPage from "./pages/DietPage";
 import CardioPage from "./pages/CardioPage";
 import RankingPage from "./pages/RankingPage";
 import ProfilePage from "./pages/ProfilePage";
+import FriendsPage from "./pages/FriendsPage";
 import SettingsPage from "./pages/SettingsPage";
 import UpgradePage from "./pages/UpgradePage";
 import NotFound from "./pages/NotFound";

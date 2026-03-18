@@ -12,6 +12,7 @@ import { TitleSelector } from '@/components/rpg/TitleSelector';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
+import { ClassSelectorDialog } from '@/components/rpg/ClassSelectorDialog';
 
 export default function ProfilePage() {
   const { profile, user, refreshProfile } = useAuth();
@@ -113,8 +114,22 @@ export default function ProfilePage() {
                 <p className="text-xs text-muted-foreground mt-2">
                   <Users className="inline h-3 w-3 mr-1" />{friends.length} amigos
                 </p>
+                <div className="mt-4 pt-4 border-t border-border/50">
+                   <ClassSelectorDialog />
+                </div>
               </div>
-              <LevelBadge level={profile.level} className={profile.className} />
+              <div className="flex flex-col items-end gap-2">
+                 <LevelBadge level={profile.level} className={profile.className} />
+                 {profile.currentClass && (
+                   <div className="flex flex-col items-end">
+                      <span className="text-[10px] font-bold uppercase text-muted-foreground">{profile.currentClass.rarity}</span>
+                      <div className="flex items-center gap-1.5 px-3 py-1 bg-secondary rounded-full border border-border">
+                         <span className="text-lg">{profile.currentClass.icon_emoji}</span>
+                         <span className="text-xs font-bold font-display">{profile.currentClass.name}</span>
+                      </div>
+                   </div>
+                 )}
+              </div>
             </div>
             <XPBar xp={profile.xp} level={profile.level} />
           </CardContent>

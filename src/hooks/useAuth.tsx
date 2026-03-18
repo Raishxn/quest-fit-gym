@@ -29,11 +29,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = async (userId: string) => {
-    const { data } = await supabase
+    const { data } = (await supabase
       .from('profiles')
-      .select('*')
+      .select('*, classes(*)')
       .eq('user_id', userId)
-      .single();
+      .single()) as any;
 
     if (data) {
       const p: UserProfile = {
@@ -56,6 +56,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         streak: data.streak,
         plan: data.plan as UserProfile['plan'],
         anamnesisComplete: data.anamnesis_complete,
+        current_class_id: data.current_class_id,
+        currentClass: data.classes ? {
+          name: data.classes.name,
+          archetype: data.classes.archetype,
+          rarity: data.classes.rarity,
+          bonus_type: data.classes.bonus_type,
+          bonus_value: data.classes.bonus_value,
+          icon_emoji: data.classes.icon_emoji,
+        } : null,
       };
       setProfile(p);
 

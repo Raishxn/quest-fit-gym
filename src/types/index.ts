@@ -27,6 +27,15 @@ export interface UserProfile {
   overall_rank?: string;
   overall_mastery_points?: number;
   selected_title_id?: string | null;
+  current_class_id?: string | null;
+  currentClass?: {
+    name: string;
+    archetype: string;
+    rarity: string;
+    bonus_type: string;
+    bonus_value: number;
+    icon_emoji: string;
+  } | null;
 }
 
 export interface Achievement {

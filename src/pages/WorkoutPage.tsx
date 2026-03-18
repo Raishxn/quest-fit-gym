@@ -46,7 +46,7 @@ interface ActiveExercise {
 }
 
 export default function WorkoutPage() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [programs, setPrograms] = useState<any[]>([]);
   const [recentSessions, setRecentSessions] = useState<WorkoutSession[]>([]);
   const [personalRecords, setPersonalRecords] = useState<any[]>([]);
@@ -309,7 +309,16 @@ export default function WorkoutPage() {
     const totalVolume = activeExercises.reduce((sum, e) =>
       sum + e.sets.reduce((s, set) => s + set.weight_kg * set.reps, 0), 0);
     const durationMin = Math.floor(sessionTimer / 60);
-    const xpGained = Math.floor(totalSets * 5 + totalVolume * 0.01 + durationMin * 2);
+    let xpGained = Math.floor(totalSets * 5 + totalVolume * 0.01 + durationMin * 2);
+
+    // RPG Class Bonus
+    if (profile?.currentClass) {
+      const { bonus_type, bonus_value } = profile.currentClass;
+      // Workout primarily gives strength_xp, but we can check if it's a general bonus or specific
+      if (bonus_type === 'strength_xp' || bonus_type === 'overall_xp') {
+        xpGained = Math.floor(xpGained * bonus_value);
+      }
+    }
 
     await supabase.from('workout_sessions').update({
       status: 'completed' as const,

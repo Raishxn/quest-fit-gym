@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { InfoTooltip } from '@/components/ui/info-tooltip';
 
 const MEAL_CATEGORIES = [
   { name: 'Café da Manhã', icon: Coffee, time: '07:00', order: 1 },
@@ -203,6 +204,7 @@ export default function DietPage() {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-3xl font-display font-bold flex items-center gap-2">
           <Salad className="h-8 w-8 text-attr-vit" /> Dieta
+          <InfoTooltip title="Dietas & Macros" content="Seus alvos de calorias e vitaminas (Macros) são gerados baseados nos seus dados e peso magro da Anamnese. A coroa de progresso em volta mostra o quanto falta para bater a meta do dia." />
         </h1>
         <p className="text-muted-foreground">Acompanhe suas refeições e macros do dia.</p>
       </motion.div>

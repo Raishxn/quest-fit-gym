@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Shield, Target, Zap, Waves, Sparkles, Sword } from 'lucide-react';
+import { InfoTooltip } from '@/components/ui/info-tooltip';
 
 export function ClassSelectorDialog({ onSelected }: { onSelected?: () => void }) {
   const { user, profile, refreshProfile } = useAuth();
@@ -72,7 +74,10 @@ export function ClassSelectorDialog({ onSelected }: { onSelected?: () => void })
       </DialogTrigger>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
-          <DialogTitle className="font-display text-2xl">O Caminho do Guerreiro</DialogTitle>
+          <DialogTitle className="font-display text-2xl flex items-center gap-2">
+            O Caminho do Guerreiro
+            <InfoTooltip title="Raridades Ocultas" content="As classes são divididas entre Comum, Incomum, Raro, Épico, Lendário e Único. Classes Lendárias ou Únicas fornecem o dobro ou triplo de bônus passivos de XP em comparação às Comuns! Você pode conquistar rolagens de classe novas em missões diárias ou baús que serão implementados." />
+          </DialogTitle>
           <DialogDescription>Escolha sua classe para receber buffs passivos de acordo com seu estilo de treino.</DialogDescription>
         </DialogHeader>
 

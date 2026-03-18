@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Shield, ShieldAlert, Search, LogOut } from 'lucide-react';
 import { toast } from 'sonner';
 import { CreateGuildDialog } from '@/components/guild/CreateGuildDialog';
+import { InfoTooltip } from '@/components/ui/info-tooltip';
 
 export default function GuildsPage() {
   const { user } = useAuth();
@@ -82,7 +83,10 @@ export default function GuildsPage() {
           <div className="mx-auto w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mb-4">
             <ShieldAlert className="w-8 h-8 text-primary" />
           </div>
-          <CardTitle className="text-2xl">Você não está em uma Guilda</CardTitle>
+          <CardTitle className="text-2xl flex items-center justify-center gap-2">
+             Você não está em uma Guilda
+             <InfoTooltip title="O que são Guildas?" content="Guildas são grupos de jogadores. Unir-se a uma aumenta o bônus de XP da party. Para fundar a sua própria guilda de elite, você precisará atingir um nível mínimo e possuir ouro (Em breve)." />
+          </CardTitle>
           <CardDescription>Junte-se a guerreiros e conquiste a glória.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 pt-4">

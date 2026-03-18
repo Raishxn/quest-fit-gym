@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import type { UserProfile, ThemeId, ClassName, Specialization } from '@/types';
 
 interface AuthContextType {
@@ -33,7 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .from('profiles')
       .select('*, classes(*)')
       .eq('user_id', userId)
-      .single()) as any;
+      .maybeSingle()) as any;
       
     if (error) {
       console.error("Profile fetch error with join, falling back to simple fetch:", error);
@@ -41,8 +42,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .from('profiles')
         .select('*')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
       data = fallback.data;
+    }
+
+    // Se o usuário apagou o perfil na mão no DB para testar a anamnese:
+    if (!data) {
+      toast('Criando novo perfil de usuário...');
+      setLoading(true);
+      const res = await supabase.from('profiles').insert({
+         user_id: userId,
+         name: 'Aventureiro',
+         username: `user_${userId.substring(0,8)}`
+      }).select().single();
+      data = res.data;
     }
 
     if (data) {

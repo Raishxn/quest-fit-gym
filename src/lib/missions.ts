@@ -16,7 +16,7 @@ export const fetchActiveMissions = async (userId: string) => {
     .select('*, template:mission_templates(*)')
     .eq('user_id', userId)
     .in('status', ['pending', 'completed'])
-    .order('created_at', { ascending: false });
+    .order('started_at', { ascending: false });
 
   if (error) {
     console.error('Error fetching active missions:', error);
@@ -86,47 +86,39 @@ export const fetchGlobalMissions = async () => {
   return data as unknown as GlobalMission[];
 };
 
-/**
- * Temp function to seed Daily Missions for a user if they have none.
- * In a real app this would be an Edge Function running on cron.
- */
 export const checkAndGenerateDailyMissions = async (userId: string) => {
-  // Auto-Seed Protocol: Se o banco estiver vazio, alimentar com as missões de base
-  const { count } = await supabase.from('mission_templates').select('*', { count: 'exact', head: true });
-  if (count === 0) {
-     console.log('Banco de missões vazio. Iniciando Auto-Seeding...');
-     const { error: seedErr } = await supabase.from('mission_templates').upsert(MISSION_TEMPLATES);
-     if (seedErr) console.error("Erro no auto-seed das missões:", seedErr);
+  // Generate Daily, Weekly, Monthly, and Master missions
+  const types: ('daily' | 'weekly' | 'monthly' | 'master')[] = ['daily', 'weekly', 'monthly', 'master'];
+  
+  for (const t of types) {
+    const { data: existing } = await supabase
+      .from('active_missions')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('type', t)
+      .in('status', ['pending', 'completed']);
+
+    // Se o usuário não possui missões relativas a este período, gera!
+    if (!existing || existing.length === 0) {
+      const limit = t === 'master' ? 1 : 3;
+      const { data: templates } = await supabase
+        .from('mission_templates')
+        .select('*')
+        .eq('type', t)
+        .limit(limit);
+
+      if (templates && templates.length > 0) {
+        const newMissions = templates.map(temp => ({
+          user_id: userId,
+          template_id: temp.id,
+          type: t,
+          target: (temp as any).target || (temp.criteria as any)?.count || 1,
+          progress: 0,
+          status: 'pending'
+        }));
+        const { error: insErr } = await supabase.from('active_missions').insert(newMissions);
+        if (insErr) console.error(`Erro inserindo missões ${t}:`, insErr);
+      }
+    }
   }
-
-  // Check if they have any active daily missions
-  const { data: existing } = await supabase
-    .from('active_missions')
-    .select('id')
-    .eq('user_id', userId)
-    .eq('type', 'daily')
-    .in('status', ['pending', 'completed']);
-
-  if (existing && existing.length > 0) return;
-
-  // Assume they don't, grab 3 random daily templates
-  const { data: templates } = await supabase
-    .from('mission_templates')
-    .select('*')
-    .eq('type', 'daily')
-    .limit(3);
-
-  if (!templates) return;
-
-  // Insert them for user
-  const newMissions = templates.map(t => ({
-    user_id: userId,
-    template_id: t.id,
-    type: 'daily',
-    target: (t.criteria as any)?.count || 1,
-    progress: 0,
-    status: 'pending'
-  }));
-
-  await supabase.from('active_missions').insert(newMissions);
 };

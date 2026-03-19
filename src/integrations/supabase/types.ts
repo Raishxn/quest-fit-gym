@@ -14,36 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      Achievement: {
-        Row: {
-          category: string
-          description: string
-          iconEmoji: string | null
-          id: string
-          key: string
-          name: string
-          xpReward: number
-        }
-        Insert: {
-          category: string
-          description: string
-          iconEmoji?: string | null
-          id: string
-          key: string
-          name: string
-          xpReward?: number
-        }
-        Update: {
-          category?: string
-          description?: string
-          iconEmoji?: string | null
-          id?: string
-          key?: string
-          name?: string
-          xpReward?: number
-        }
-        Relationships: []
-      }
       achievements: {
         Row: {
           category: string
@@ -83,42 +53,39 @@ export type Database = {
       active_missions: {
         Row: {
           completed_at: string | null
-          created_at: string
           expires_at: string | null
           id: string
-          progress: number
-          started_at: string
-          status: string
-          target: number
-          template_id: string
+          progress: number | null
+          started_at: string | null
+          status: string | null
+          target: number | null
+          template_id: string | null
           type: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           completed_at?: string | null
-          created_at?: string
           expires_at?: string | null
           id?: string
-          progress?: number
-          started_at?: string
-          status?: string
-          target: number
-          template_id: string
+          progress?: number | null
+          started_at?: string | null
+          status?: string | null
+          target?: number | null
+          template_id?: string | null
           type: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           completed_at?: string | null
-          created_at?: string
           expires_at?: string | null
           id?: string
-          progress?: number
-          started_at?: string
-          status?: string
-          target?: number
-          template_id?: string
+          progress?: number | null
+          started_at?: string | null
+          status?: string | null
+          target?: number | null
+          template_id?: string | null
           type?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -127,6 +94,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "mission_templates"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "active_missions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -218,225 +192,60 @@ export type Database = {
         Row: {
           body: string
           id: string
-          published_at: string
+          published_at: string | null
           title: string
           version: string
         }
         Insert: {
           body: string
           id?: string
-          published_at?: string
+          published_at?: string | null
           title: string
           version: string
         }
         Update: {
           body?: string
           id?: string
-          published_at?: string
+          published_at?: string | null
           title?: string
           version?: string
         }
         Relationships: []
       }
-      BankComment: {
-        Row: {
-          authorId: string
-          bankItemId: string
-          body: string
-          createdAt: string
-          fileUrl: string | null
-          id: string
-          upvotes: number
-        }
-        Insert: {
-          authorId: string
-          bankItemId: string
-          body: string
-          createdAt?: string
-          fileUrl?: string | null
-          id: string
-          upvotes?: number
-        }
-        Update: {
-          authorId?: string
-          bankItemId?: string
-          body?: string
-          createdAt?: string
-          fileUrl?: string | null
-          id?: string
-          upvotes?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "BankComment_authorId_fkey"
-            columns: ["authorId"]
-            isOneToOne: false
-            referencedRelation: "User"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "BankComment_bankItemId_fkey"
-            columns: ["bankItemId"]
-            isOneToOne: false
-            referencedRelation: "BankItem"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      BankItem: {
-        Row: {
-          course: string | null
-          createdAt: string
-          fileHash: string
-          fileUrl: string
-          id: string
-          institution: string | null
-          period: string | null
-          professor: string | null
-          rating: number
-          ratingCount: number
-          subject: string
-          title: string
-          type: string
-          uploadedBy: string
-        }
-        Insert: {
-          course?: string | null
-          createdAt?: string
-          fileHash: string
-          fileUrl: string
-          id: string
-          institution?: string | null
-          period?: string | null
-          professor?: string | null
-          rating?: number
-          ratingCount?: number
-          subject: string
-          title: string
-          type: string
-          uploadedBy: string
-        }
-        Update: {
-          course?: string | null
-          createdAt?: string
-          fileHash?: string
-          fileUrl?: string
-          id?: string
-          institution?: string | null
-          period?: string | null
-          professor?: string | null
-          rating?: number
-          ratingCount?: number
-          subject?: string
-          title?: string
-          type?: string
-          uploadedBy?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "BankItem_uploadedBy_fkey"
-            columns: ["uploadedBy"]
-            isOneToOne: false
-            referencedRelation: "User"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      BankRating: {
-        Row: {
-          bankItemId: string
-          createdAt: string
-          id: string
-          score: number
-          userId: string
-        }
-        Insert: {
-          bankItemId: string
-          createdAt?: string
-          id: string
-          score: number
-          userId: string
-        }
-        Update: {
-          bankItemId?: string
-          createdAt?: string
-          id?: string
-          score?: number
-          userId?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "BankRating_bankItemId_fkey"
-            columns: ["bankItemId"]
-            isOneToOne: false
-            referencedRelation: "BankItem"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "BankRating_userId_fkey"
-            columns: ["userId"]
-            isOneToOne: false
-            referencedRelation: "User"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      body_measurements: {
-        Row: {
-          body_fat_percent: number | null
-          created_at: string
-          id: string
-          measured_at: string
-          user_id: string
-          waist_cm: number | null
-          weight_kg: number
-        }
-        Insert: {
-          body_fat_percent?: number | null
-          created_at?: string
-          id?: string
-          measured_at?: string
-          user_id: string
-          waist_cm?: number | null
-          weight_kg: number
-        }
-        Update: {
-          body_fat_percent?: number | null
-          created_at?: string
-          id?: string
-          measured_at?: string
-          user_id?: string
-          waist_cm?: number | null
-          weight_kg?: number
-        }
-        Relationships: []
-      }
       body_weight_logs: {
         Row: {
-          created_at: string
+          created_at: string | null
           date: string
           id: string
           notes: string | null
-          user_id: string
+          user_id: string | null
           weight_kg: number
         }
         Insert: {
-          created_at?: string
+          created_at?: string | null
           date: string
           id?: string
           notes?: string | null
-          user_id: string
+          user_id?: string | null
           weight_kg: number
         }
         Update: {
-          created_at?: string
+          created_at?: string | null
           date?: string
           id?: string
           notes?: string | null
-          user_id?: string
+          user_id?: string | null
           weight_kg?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "body_weight_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       cardio_sessions: {
         Row: {
@@ -483,123 +292,62 @@ export type Database = {
         }
         Relationships: []
       }
-      ChatConversation: {
+      class_ranks: {
         Row: {
-          createdAt: string
+          bonus_value: number | null
+          class_key: string
+          debuff_value: number | null
           id: string
-          name: string | null
-          type: string
+          rank_name: string
+          tier: number
+          xp_required: number | null
         }
         Insert: {
-          createdAt?: string
-          id: string
-          name?: string | null
-          type: string
+          bonus_value?: number | null
+          class_key: string
+          debuff_value?: number | null
+          id?: string
+          rank_name: string
+          tier: number
+          xp_required?: number | null
         }
         Update: {
-          createdAt?: string
+          bonus_value?: number | null
+          class_key?: string
+          debuff_value?: number | null
           id?: string
-          name?: string | null
-          type?: string
+          rank_name?: string
+          tier?: number
+          xp_required?: number | null
         }
         Relationships: []
       }
-      ChatMember: {
+      cosmetics: {
         Row: {
-          conversationId: string
+          asset_value: string | null
           id: string
-          userId: string
-        }
-        Insert: {
-          conversationId: string
-          id: string
-          userId: string
-        }
-        Update: {
-          conversationId?: string
-          id?: string
-          userId?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "ChatMember_conversationId_fkey"
-            columns: ["conversationId"]
-            isOneToOne: false
-            referencedRelation: "ChatConversation"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      ChatMessage: {
-        Row: {
-          body: string | null
-          conversationId: string
-          createdAt: string
-          fileUrl: string | null
-          id: string
-          senderId: string
-        }
-        Insert: {
-          body?: string | null
-          conversationId: string
-          createdAt?: string
-          fileUrl?: string | null
-          id: string
-          senderId: string
-        }
-        Update: {
-          body?: string | null
-          conversationId?: string
-          createdAt?: string
-          fileUrl?: string | null
-          id?: string
-          senderId?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "ChatMessage_conversationId_fkey"
-            columns: ["conversationId"]
-            isOneToOne: false
-            referencedRelation: "ChatConversation"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ChatMessage_senderId_fkey"
-            columns: ["senderId"]
-            isOneToOne: false
-            referencedRelation: "User"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      Course: {
-        Row: {
-          area: string
-          id: string
-          institutionId: string
+          is_vip_only: boolean | null
           name: string
+          price_coins: number | null
+          type: string
         }
         Insert: {
-          area: string
-          id: string
-          institutionId: string
+          asset_value?: string | null
+          id?: string
+          is_vip_only?: boolean | null
           name: string
+          price_coins?: number | null
+          type: string
         }
         Update: {
-          area?: string
+          asset_value?: string | null
           id?: string
-          institutionId?: string
+          is_vip_only?: boolean | null
           name?: string
+          price_coins?: number | null
+          type?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "Course_institutionId_fkey"
-            columns: ["institutionId"]
-            isOneToOne: false
-            referencedRelation: "Institution"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       diet_days: {
         Row: {
@@ -640,30 +388,6 @@ export type Database = {
           total_protein_g?: number
           total_water_ml?: number
           user_id?: string
-        }
-        Relationships: []
-      }
-      EmailVerification: {
-        Row: {
-          createdAt: string
-          expiresAt: string
-          id: string
-          token: string
-          userId: string
-        }
-        Insert: {
-          createdAt?: string
-          expiresAt: string
-          id: string
-          token: string
-          userId: string
-        }
-        Update: {
-          createdAt?: string
-          expiresAt?: string
-          id?: string
-          token?: string
-          userId?: string
         }
         Relationships: []
       }
@@ -896,215 +620,6 @@ export type Database = {
         }
         Relationships: []
       }
-      ForumPost: {
-        Row: {
-          authorId: string
-          body: string
-          createdAt: string
-          fileUrl: string | null
-          id: string
-          solved: boolean
-          subject: string
-          tags: string[] | null
-          title: string
-          updatedAt: string
-          upvotes: number
-        }
-        Insert: {
-          authorId: string
-          body: string
-          createdAt?: string
-          fileUrl?: string | null
-          id: string
-          solved?: boolean
-          subject: string
-          tags?: string[] | null
-          title: string
-          updatedAt: string
-          upvotes?: number
-        }
-        Update: {
-          authorId?: string
-          body?: string
-          createdAt?: string
-          fileUrl?: string | null
-          id?: string
-          solved?: boolean
-          subject?: string
-          tags?: string[] | null
-          title?: string
-          updatedAt?: string
-          upvotes?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "ForumPost_authorId_fkey"
-            columns: ["authorId"]
-            isOneToOne: false
-            referencedRelation: "User"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      ForumPostUpvote: {
-        Row: {
-          createdAt: string
-          id: string
-          postId: string
-          userId: string
-        }
-        Insert: {
-          createdAt?: string
-          id: string
-          postId: string
-          userId: string
-        }
-        Update: {
-          createdAt?: string
-          id?: string
-          postId?: string
-          userId?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "ForumPostUpvote_postId_fkey"
-            columns: ["postId"]
-            isOneToOne: false
-            referencedRelation: "ForumPost"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ForumPostUpvote_userId_fkey"
-            columns: ["userId"]
-            isOneToOne: false
-            referencedRelation: "User"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      ForumReply: {
-        Row: {
-          authorId: string
-          body: string
-          createdAt: string
-          fileUrl: string | null
-          id: string
-          isAccepted: boolean
-          postId: string
-          upvotes: number
-        }
-        Insert: {
-          authorId: string
-          body: string
-          createdAt?: string
-          fileUrl?: string | null
-          id: string
-          isAccepted?: boolean
-          postId: string
-          upvotes?: number
-        }
-        Update: {
-          authorId?: string
-          body?: string
-          createdAt?: string
-          fileUrl?: string | null
-          id?: string
-          isAccepted?: boolean
-          postId?: string
-          upvotes?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "ForumReply_authorId_fkey"
-            columns: ["authorId"]
-            isOneToOne: false
-            referencedRelation: "User"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ForumReply_postId_fkey"
-            columns: ["postId"]
-            isOneToOne: false
-            referencedRelation: "ForumPost"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      ForumReplyUpvote: {
-        Row: {
-          createdAt: string
-          id: string
-          replyId: string
-          userId: string
-        }
-        Insert: {
-          createdAt?: string
-          id: string
-          replyId: string
-          userId: string
-        }
-        Update: {
-          createdAt?: string
-          id?: string
-          replyId?: string
-          userId?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "ForumReplyUpvote_replyId_fkey"
-            columns: ["replyId"]
-            isOneToOne: false
-            referencedRelation: "ForumReply"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ForumReplyUpvote_userId_fkey"
-            columns: ["userId"]
-            isOneToOne: false
-            referencedRelation: "User"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      Friendship: {
-        Row: {
-          createdAt: string
-          fromId: string
-          id: string
-          status: string
-          toId: string
-        }
-        Insert: {
-          createdAt?: string
-          fromId: string
-          id: string
-          status: string
-          toId: string
-        }
-        Update: {
-          createdAt?: string
-          fromId?: string
-          id?: string
-          status?: string
-          toId?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "Friendship_fromId_fkey"
-            columns: ["fromId"]
-            isOneToOne: false
-            referencedRelation: "User"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "Friendship_toId_fkey"
-            columns: ["toId"]
-            isOneToOne: false
-            referencedRelation: "User"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       friendships: {
         Row: {
           created_at: string
@@ -1132,24 +647,24 @@ export type Database = {
       global_mission_contributions: {
         Row: {
           amount: number
-          created_at: string
-          global_mission_id: string
+          created_at: string | null
+          global_mission_id: string | null
           id: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           amount: number
-          created_at?: string
-          global_mission_id: string
+          created_at?: string | null
+          global_mission_id?: string | null
           id?: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           amount?: number
-          created_at?: string
-          global_mission_id?: string
+          created_at?: string | null
+          global_mission_id?: string | null
           id?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -1159,46 +674,50 @@ export type Database = {
             referencedRelation: "global_missions"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "global_mission_contributions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       global_missions: {
         Row: {
-          created_at: string
-          current_progress: number
-          description: string
-          ends_at: string
+          current_progress: number | null
+          description: string | null
+          ends_at: string | null
           id: string
-          reward_data: Json
-          started_at: string
-          status: string
+          reward_data: Json | null
+          started_at: string | null
+          status: string | null
           target: number
-          template_id: string
+          template_id: string | null
           title: string
         }
         Insert: {
-          created_at?: string
-          current_progress?: number
-          description: string
-          ends_at: string
+          current_progress?: number | null
+          description?: string | null
+          ends_at?: string | null
           id?: string
-          reward_data?: Json
-          started_at?: string
-          status?: string
+          reward_data?: Json | null
+          started_at?: string | null
+          status?: string | null
           target: number
-          template_id: string
+          template_id?: string | null
           title: string
         }
         Update: {
-          created_at?: string
-          current_progress?: number
-          description?: string
-          ends_at?: string
+          current_progress?: number | null
+          description?: string | null
+          ends_at?: string | null
           id?: string
-          reward_data?: Json
-          started_at?: string
-          status?: string
+          reward_data?: Json | null
+          started_at?: string | null
+          status?: string | null
           target?: number
-          template_id?: string
+          template_id?: string | null
           title?: string
         }
         Relationships: [
@@ -1213,25 +732,25 @@ export type Database = {
       }
       guild_members: {
         Row: {
-          guild_id: string
+          guild_id: string | null
           id: string
-          joined_at: string
-          role: string
-          user_id: string
+          joined_at: string | null
+          role: string | null
+          user_id: string | null
         }
         Insert: {
-          guild_id: string
+          guild_id?: string | null
           id?: string
-          joined_at?: string
-          role?: string
-          user_id: string
+          joined_at?: string | null
+          role?: string | null
+          user_id?: string | null
         }
         Update: {
-          guild_id?: string
+          guild_id?: string | null
           id?: string
-          joined_at?: string
-          role?: string
-          user_id?: string
+          joined_at?: string | null
+          role?: string | null
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -1241,41 +760,45 @@ export type Database = {
             referencedRelation: "guilds"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "guild_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       guild_missions: {
         Row: {
-          created_at: string
-          guild_id: string
+          guild_id: string | null
           id: string
-          progress: number
-          status: string
-          target: number
-          template_id: string
-          week_end: string
-          week_start: string
+          progress: number | null
+          status: string | null
+          target: number | null
+          template_id: string | null
+          week_end: string | null
+          week_start: string | null
         }
         Insert: {
-          created_at?: string
-          guild_id: string
+          guild_id?: string | null
           id?: string
-          progress?: number
-          status?: string
-          target: number
-          template_id: string
-          week_end: string
-          week_start: string
+          progress?: number | null
+          status?: string | null
+          target?: number | null
+          template_id?: string | null
+          week_end?: string | null
+          week_start?: string | null
         }
         Update: {
-          created_at?: string
-          guild_id?: string
+          guild_id?: string | null
           id?: string
-          progress?: number
-          status?: string
-          target?: number
-          template_id?: string
-          week_end?: string
-          week_start?: string
+          progress?: number | null
+          status?: string | null
+          target?: number | null
+          template_id?: string | null
+          week_end?: string | null
+          week_start?: string | null
         }
         Relationships: [
           {
@@ -1296,81 +819,50 @@ export type Database = {
       }
       guilds: {
         Row: {
-          created_at: string
+          created_at: string | null
           description: string | null
           emblem_url: string | null
-          guild_power: number
+          guild_power: number | null
           id: string
-          is_recruiting: boolean
-          max_members: number
+          is_recruiting: boolean | null
+          max_members: number | null
           name: string
-          owner_id: string
+          owner_id: string | null
           tag: string
-          updated_at: string
         }
         Insert: {
-          created_at?: string
+          created_at?: string | null
           description?: string | null
           emblem_url?: string | null
-          guild_power?: number
+          guild_power?: number | null
           id?: string
-          is_recruiting?: boolean
-          max_members?: number
+          is_recruiting?: boolean | null
+          max_members?: number | null
           name: string
-          owner_id: string
+          owner_id?: string | null
           tag: string
-          updated_at?: string
         }
         Update: {
-          created_at?: string
+          created_at?: string | null
           description?: string | null
           emblem_url?: string | null
-          guild_power?: number
+          guild_power?: number | null
           id?: string
-          is_recruiting?: boolean
-          max_members?: number
+          is_recruiting?: boolean | null
+          max_members?: number | null
           name?: string
-          owner_id?: string
+          owner_id?: string | null
           tag?: string
-          updated_at?: string
         }
-        Relationships: []
-      }
-      Institution: {
-        Row: {
-          active: boolean
-          campus: string
-          city: string
-          emecCode: string
-          id: string
-          name: string
-          shortName: string | null
-          state: string
-          type: string
-        }
-        Insert: {
-          active?: boolean
-          campus?: string
-          city: string
-          emecCode: string
-          id: string
-          name: string
-          shortName?: string | null
-          state: string
-          type: string
-        }
-        Update: {
-          active?: boolean
-          campus?: string
-          city?: string
-          emecCode?: string
-          id?: string
-          name?: string
-          shortName?: string | null
-          state?: string
-          type?: string
-        }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "guilds_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       meal_items: {
         Row: {
@@ -1457,148 +949,49 @@ export type Database = {
       }
       mission_templates: {
         Row: {
-          category: string
-          created_at: string
-          criteria: Json
-          description: string
-          difficulty: string
-          icon_emoji: string
+          category: string | null
+          criteria: Json | null
+          description: string | null
+          difficulty: string | null
+          icon_emoji: string | null
           id: string
-          is_active: boolean
+          is_active: boolean | null
           key: string
-          mastery_points_reward: number
+          mastery_points_reward: number | null
+          target: number | null
           title: string
           type: string
-          xp_reward: number
+          xp_reward: number | null
         }
         Insert: {
-          category: string
-          created_at?: string
-          criteria?: Json
-          description: string
-          difficulty?: string
-          icon_emoji: string
-          id?: string
-          is_active?: boolean
+          category?: string | null
+          criteria?: Json | null
+          description?: string | null
+          difficulty?: string | null
+          icon_emoji?: string | null
+          id: string
+          is_active?: boolean | null
           key: string
-          mastery_points_reward?: number
+          mastery_points_reward?: number | null
+          target?: number | null
           title: string
           type: string
-          xp_reward?: number
+          xp_reward?: number | null
         }
         Update: {
-          category?: string
-          created_at?: string
-          criteria?: Json
-          description?: string
-          difficulty?: string
-          icon_emoji?: string
+          category?: string | null
+          criteria?: Json | null
+          description?: string | null
+          difficulty?: string | null
+          icon_emoji?: string | null
           id?: string
-          is_active?: boolean
+          is_active?: boolean | null
           key?: string
-          mastery_points_reward?: number
+          mastery_points_reward?: number | null
+          target?: number | null
           title?: string
           type?: string
-          xp_reward?: number
-        }
-        Relationships: []
-      }
-      ModerationAction: {
-        Row: {
-          action: string
-          contentId: string | null
-          contentType: string | null
-          createdAt: string
-          duration: number | null
-          id: string
-          moderatorId: string
-          notes: string | null
-          reason: string
-          targetUserId: string
-        }
-        Insert: {
-          action: string
-          contentId?: string | null
-          contentType?: string | null
-          createdAt?: string
-          duration?: number | null
-          id: string
-          moderatorId: string
-          notes?: string | null
-          reason: string
-          targetUserId: string
-        }
-        Update: {
-          action?: string
-          contentId?: string | null
-          contentType?: string | null
-          createdAt?: string
-          duration?: number | null
-          id?: string
-          moderatorId?: string
-          notes?: string | null
-          reason?: string
-          targetUserId?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "ModerationAction_moderatorId_fkey"
-            columns: ["moderatorId"]
-            isOneToOne: false
-            referencedRelation: "User"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ModerationAction_targetUserId_fkey"
-            columns: ["targetUserId"]
-            isOneToOne: false
-            referencedRelation: "User"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      ModerationReport: {
-        Row: {
-          action: string | null
-          category: string
-          contentId: string
-          contentType: string
-          createdAt: string
-          description: string | null
-          id: string
-          priority: string
-          reporterId: string
-          resolvedAt: string | null
-          resolvedBy: string | null
-          status: string
-        }
-        Insert: {
-          action?: string | null
-          category: string
-          contentId: string
-          contentType: string
-          createdAt?: string
-          description?: string | null
-          id: string
-          priority: string
-          reporterId: string
-          resolvedAt?: string | null
-          resolvedBy?: string | null
-          status?: string
-        }
-        Update: {
-          action?: string | null
-          category?: string
-          contentId?: string
-          contentType?: string
-          createdAt?: string
-          description?: string | null
-          id?: string
-          priority?: string
-          reporterId?: string
-          resolvedAt?: string | null
-          resolvedBy?: string | null
-          status?: string
+          xp_reward?: number | null
         }
         Relationships: []
       }
@@ -1638,51 +1031,56 @@ export type Database = {
       party_lobbies: {
         Row: {
           code: string
-          created_at: string
-          host_id: string
+          created_at: string | null
+          host_id: string | null
           id: string
-          max_members: number
-          status: string
-          updated_at: string
+          max_members: number | null
+          status: string | null
         }
         Insert: {
           code: string
-          created_at?: string
-          host_id: string
+          created_at?: string | null
+          host_id?: string | null
           id?: string
-          max_members?: number
-          status?: string
-          updated_at?: string
+          max_members?: number | null
+          status?: string | null
         }
         Update: {
           code?: string
-          created_at?: string
-          host_id?: string
+          created_at?: string | null
+          host_id?: string | null
           id?: string
-          max_members?: number
-          status?: string
-          updated_at?: string
+          max_members?: number | null
+          status?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "party_lobbies_host_id_fkey"
+            columns: ["host_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       party_members: {
         Row: {
           id: string
-          joined_at: string
-          lobby_id: string
-          user_id: string
+          joined_at: string | null
+          lobby_id: string | null
+          user_id: string | null
         }
         Insert: {
           id?: string
-          joined_at?: string
-          lobby_id: string
-          user_id: string
+          joined_at?: string | null
+          lobby_id?: string | null
+          user_id?: string | null
         }
         Update: {
           id?: string
-          joined_at?: string
-          lobby_id?: string
-          user_id?: string
+          joined_at?: string | null
+          lobby_id?: string | null
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -1692,34 +1090,14 @@ export type Database = {
             referencedRelation: "party_lobbies"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "party_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
         ]
-      }
-      PasswordReset: {
-        Row: {
-          createdAt: string
-          expiresAt: string
-          id: string
-          tokenHash: string
-          usedAt: string | null
-          userId: string
-        }
-        Insert: {
-          createdAt?: string
-          expiresAt: string
-          id: string
-          tokenHash: string
-          usedAt?: string | null
-          userId: string
-        }
-        Update: {
-          createdAt?: string
-          expiresAt?: string
-          id?: string
-          tokenHash?: string
-          usedAt?: string | null
-          userId?: string
-        }
-        Relationships: []
       }
       personal_records: {
         Row: {
@@ -1811,6 +1189,7 @@ export type Database = {
         Row: {
           agi_attr: number
           anamnesis_complete: boolean
+          avatar_glow_color: string | null
           avatar_url: string | null
           banner_url: string | null
           bio: string | null
@@ -1818,18 +1197,22 @@ export type Database = {
           created_at: string
           email: string | null
           end_attr: number
+          frame_url: string | null
           id: string
+          is_premium: boolean | null
           last_activity_date: string | null
           level: number
           locale: string
           name: string
-          overall_mastery_points: number
-          overall_rank: string
-          peak_overall_rank: string
+          name_color: string | null
+          overall_mastery_points: number | null
+          overall_rank: string | null
+          peak_overall_rank: string | null
           plan: Database["public"]["Enums"]["user_plan"]
           playlist_url: string | null
           preferences: Json
           privacy_settings: Json
+          profile_font: string | null
           selected_title_id: string | null
           specialization: Database["public"]["Enums"]["specialization"] | null
           str_attr: number
@@ -1845,6 +1228,7 @@ export type Database = {
         Insert: {
           agi_attr?: number
           anamnesis_complete?: boolean
+          avatar_glow_color?: string | null
           avatar_url?: string | null
           banner_url?: string | null
           bio?: string | null
@@ -1852,18 +1236,22 @@ export type Database = {
           created_at?: string
           email?: string | null
           end_attr?: number
+          frame_url?: string | null
           id?: string
+          is_premium?: boolean | null
           last_activity_date?: string | null
           level?: number
           locale?: string
           name?: string
-          overall_mastery_points?: number
-          overall_rank?: string
-          peak_overall_rank?: string
+          name_color?: string | null
+          overall_mastery_points?: number | null
+          overall_rank?: string | null
+          peak_overall_rank?: string | null
           plan?: Database["public"]["Enums"]["user_plan"]
           playlist_url?: string | null
           preferences?: Json
           privacy_settings?: Json
+          profile_font?: string | null
           selected_title_id?: string | null
           specialization?: Database["public"]["Enums"]["specialization"] | null
           str_attr?: number
@@ -1879,6 +1267,7 @@ export type Database = {
         Update: {
           agi_attr?: number
           anamnesis_complete?: boolean
+          avatar_glow_color?: string | null
           avatar_url?: string | null
           banner_url?: string | null
           bio?: string | null
@@ -1886,18 +1275,22 @@ export type Database = {
           created_at?: string
           email?: string | null
           end_attr?: number
+          frame_url?: string | null
           id?: string
+          is_premium?: boolean | null
           last_activity_date?: string | null
           level?: number
           locale?: string
           name?: string
-          overall_mastery_points?: number
-          overall_rank?: string
-          peak_overall_rank?: string
+          name_color?: string | null
+          overall_mastery_points?: number | null
+          overall_rank?: string | null
+          peak_overall_rank?: string | null
           plan?: Database["public"]["Enums"]["user_plan"]
           playlist_url?: string | null
           preferences?: Json
           privacy_settings?: Json
+          profile_font?: string | null
           selected_title_id?: string | null
           specialization?: Database["public"]["Enums"]["specialization"] | null
           str_attr?: number
@@ -1912,80 +1305,10 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "fk_profiles_selected_title"
+            foreignKeyName: "profiles_selected_title_id_fkey"
             columns: ["selected_title_id"]
             isOneToOne: false
             referencedRelation: "titles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      RankingSnapshot: {
-        Row: {
-          date: string
-          id: string
-          period: string
-          rank: number
-          type: string
-          userId: string
-          xp: number
-        }
-        Insert: {
-          date?: string
-          id: string
-          period: string
-          rank: number
-          type: string
-          userId: string
-          xp: number
-        }
-        Update: {
-          date?: string
-          id?: string
-          period?: string
-          rank?: number
-          type?: string
-          userId?: string
-          xp?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "RankingSnapshot_userId_fkey"
-            columns: ["userId"]
-            isOneToOne: false
-            referencedRelation: "User"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      RefreshToken: {
-        Row: {
-          createdAt: string
-          expiresAt: string
-          id: string
-          tokenHash: string
-          userId: string
-        }
-        Insert: {
-          createdAt?: string
-          expiresAt: string
-          id: string
-          tokenHash: string
-          userId: string
-        }
-        Update: {
-          createdAt?: string
-          expiresAt?: string
-          id?: string
-          tokenHash?: string
-          userId?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "RefreshToken_userId_fkey"
-            columns: ["userId"]
-            isOneToOne: false
-            referencedRelation: "User"
             referencedColumns: ["id"]
           },
         ]
@@ -2034,181 +1357,35 @@ export type Database = {
           },
         ]
       }
-      StudySession: {
-        Row: {
-          duration: number
-          endedAt: string | null
-          id: string
-          lastHeartbeat: string | null
-          mode: string
-          pausedDuration: number
-          pomodorosCompleted: number
-          startedAt: string
-          status: string
-          subject: string
-          topic: string | null
-          userId: string
-          xpGained: number
-        }
-        Insert: {
-          duration?: number
-          endedAt?: string | null
-          id: string
-          lastHeartbeat?: string | null
-          mode: string
-          pausedDuration?: number
-          pomodorosCompleted?: number
-          startedAt?: string
-          status?: string
-          subject: string
-          topic?: string | null
-          userId: string
-          xpGained?: number
-        }
-        Update: {
-          duration?: number
-          endedAt?: string | null
-          id?: string
-          lastHeartbeat?: string | null
-          mode?: string
-          pausedDuration?: number
-          pomodorosCompleted?: number
-          startedAt?: string
-          status?: string
-          subject?: string
-          topic?: string | null
-          userId?: string
-          xpGained?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "StudySession_userId_fkey"
-            columns: ["userId"]
-            isOneToOne: false
-            referencedRelation: "User"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       titles: {
         Row: {
-          category: string
-          created_at: string
-          description: string
+          category: string | null
+          description: string | null
           id: string
           key: string
           name: string
-          rarity: string
-          requirement: Json
+          rarity: string | null
+          requirement: Json | null
         }
         Insert: {
-          category: string
-          created_at?: string
-          description: string
+          category?: string | null
+          description?: string | null
           id?: string
           key: string
           name: string
-          rarity?: string
-          requirement?: Json
+          rarity?: string | null
+          requirement?: Json | null
         }
         Update: {
-          category?: string
-          created_at?: string
-          description?: string
+          category?: string | null
+          description?: string | null
           id?: string
           key?: string
           name?: string
-          rarity?: string
-          requirement?: Json
+          rarity?: string | null
+          requirement?: Json | null
         }
         Relationships: []
-      }
-      User: {
-        Row: {
-          avatarUrl: string | null
-          bannerUrl: string | null
-          courseId: string | null
-          createdAt: string
-          currentStreak: number
-          email: string
-          emailVerified: boolean
-          id: string
-          institutionId: string | null
-          level: number
-          name: string | null
-          passwordHash: string | null
-          preferences: Json
-          role: string
-          semester: number | null
-          shift: string | null
-          title: string
-          unidade: string | null
-          updatedAt: string
-          username: string
-          xp: number
-        }
-        Insert: {
-          avatarUrl?: string | null
-          bannerUrl?: string | null
-          courseId?: string | null
-          createdAt?: string
-          currentStreak?: number
-          email: string
-          emailVerified?: boolean
-          id: string
-          institutionId?: string | null
-          level?: number
-          name?: string | null
-          passwordHash?: string | null
-          preferences?: Json
-          role?: string
-          semester?: number | null
-          shift?: string | null
-          title?: string
-          unidade?: string | null
-          updatedAt: string
-          username: string
-          xp?: number
-        }
-        Update: {
-          avatarUrl?: string | null
-          bannerUrl?: string | null
-          courseId?: string | null
-          createdAt?: string
-          currentStreak?: number
-          email?: string
-          emailVerified?: boolean
-          id?: string
-          institutionId?: string | null
-          level?: number
-          name?: string | null
-          passwordHash?: string | null
-          preferences?: Json
-          role?: string
-          semester?: number | null
-          shift?: string | null
-          title?: string
-          unidade?: string | null
-          updatedAt?: string
-          username?: string
-          xp?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "User_courseId_fkey"
-            columns: ["courseId"]
-            isOneToOne: false
-            referencedRelation: "Course"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "User_institutionId_fkey"
-            columns: ["institutionId"]
-            isOneToOne: false
-            referencedRelation: "Institution"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       user_achievements: {
         Row: {
@@ -2239,32 +1416,108 @@ export type Database = {
           },
         ]
       }
-      user_feedback: {
+      user_class_progress: {
         Row: {
-          created_at: string
+          class_key: string
+          current_tier: number | null
+          current_xp: number | null
           id: string
-          message: string
-          status: string
-          type: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
-          created_at?: string
+          class_key: string
+          current_tier?: number | null
+          current_xp?: number | null
           id?: string
-          message: string
-          status?: string
-          type: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
-          created_at?: string
+          class_key?: string
+          current_tier?: number | null
+          current_xp?: number | null
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_class_progress_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      user_cosmetics: {
+        Row: {
+          cosmetic_id: string | null
+          id: string
+          unlocked_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          cosmetic_id?: string | null
+          id?: string
+          unlocked_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          cosmetic_id?: string | null
+          id?: string
+          unlocked_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_cosmetics_cosmetic_id_fkey"
+            columns: ["cosmetic_id"]
+            isOneToOne: false
+            referencedRelation: "cosmetics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_cosmetics_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      user_feedback: {
+        Row: {
+          created_at: string | null
+          id: string
+          message: string
+          status: string | null
+          type: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          message: string
+          status?: string | null
+          type: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
           id?: string
           message?: string
-          status?: string
+          status?: string | null
           type?: string
-          user_id?: string
+          user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_feedback_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -2287,21 +1540,21 @@ export type Database = {
       user_titles: {
         Row: {
           id: string
-          title_id: string
-          unlocked_at: string
-          user_id: string
+          title_id: string | null
+          unlocked_at: string | null
+          user_id: string | null
         }
         Insert: {
           id?: string
-          title_id: string
-          unlocked_at?: string
-          user_id: string
+          title_id?: string | null
+          unlocked_at?: string | null
+          user_id?: string | null
         }
         Update: {
           id?: string
-          title_id?: string
-          unlocked_at?: string
-          user_id?: string
+          title_id?: string | null
+          unlocked_at?: string | null
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -2311,105 +1564,14 @@ export type Database = {
             referencedRelation: "titles"
             referencedColumns: ["id"]
           },
-        ]
-      }
-      UserAchievement: {
-        Row: {
-          achievementId: string
-          id: string
-          unlockedAt: string
-          userId: string
-        }
-        Insert: {
-          achievementId: string
-          id: string
-          unlockedAt?: string
-          userId: string
-        }
-        Update: {
-          achievementId?: string
-          id?: string
-          unlockedAt?: string
-          userId?: string
-        }
-        Relationships: [
           {
-            foreignKeyName: "UserAchievement_achievementId_fkey"
-            columns: ["achievementId"]
+            foreignKeyName: "user_titles_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "Achievement"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "UserAchievement_userId_fkey"
-            columns: ["userId"]
-            isOneToOne: false
-            referencedRelation: "User"
-            referencedColumns: ["id"]
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
           },
         ]
-      }
-      UserSuspension: {
-        Row: {
-          createdAt: string
-          createdBy: string
-          endAt: string | null
-          id: string
-          reason: string
-          startAt: string
-          userId: string
-        }
-        Insert: {
-          createdAt?: string
-          createdBy: string
-          endAt?: string | null
-          id: string
-          reason: string
-          startAt?: string
-          userId: string
-        }
-        Update: {
-          createdAt?: string
-          createdBy?: string
-          endAt?: string | null
-          id?: string
-          reason?: string
-          startAt?: string
-          userId?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "UserSuspension_userId_fkey"
-            columns: ["userId"]
-            isOneToOne: false
-            referencedRelation: "User"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      UserWarning: {
-        Row: {
-          createdAt: string
-          expiresAt: string
-          id: string
-          reason: string
-          userId: string
-        }
-        Insert: {
-          createdAt?: string
-          expiresAt: string
-          id: string
-          reason: string
-          userId: string
-        }
-        Update: {
-          createdAt?: string
-          expiresAt?: string
-          id?: string
-          reason?: string
-          userId?: string
-        }
-        Relationships: []
       }
       workout_days: {
         Row: {
@@ -2573,41 +1735,6 @@ export type Database = {
         }
         Relationships: []
       }
-      XPTransaction: {
-        Row: {
-          amount: number
-          createdAt: string
-          id: string
-          refId: string | null
-          source: string
-          userId: string
-        }
-        Insert: {
-          amount: number
-          createdAt?: string
-          id: string
-          refId?: string | null
-          source: string
-          userId: string
-        }
-        Update: {
-          amount?: number
-          createdAt?: string
-          id?: string
-          refId?: string | null
-          source?: string
-          userId?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "XPTransaction_userId_fkey"
-            columns: ["userId"]
-            isOneToOne: false
-            referencedRelation: "User"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
     }
     Views: {
       [_ in never]: never
@@ -2631,7 +1758,7 @@ export type Database = {
         | "Guerreiro"
         | "Veterano"
         | "Elite"
-        | "LendÃ¡rio"
+        | "Lendário"
         | "Imortal"
       set_type: "warmup" | "working" | "backoff"
       specialization: "hercules" | "hermes" | "apollo" | "athena"
@@ -2773,7 +1900,7 @@ export const Constants = {
         "Guerreiro",
         "Veterano",
         "Elite",
-        "LendÃ¡rio",
+        "Lendário",
         "Imortal",
       ],
       set_type: ["warmup", "working", "backoff"],

@@ -186,7 +186,7 @@ export default function ImageCropDialog({
   }, [zoom, position, outputWidth, finalHeight, shape, onCropComplete, onOpenChange]);
 
   // Preview dimensions
-  const previewWidth = 280;
+  const previewWidth = shape === 'circle' ? 280 : 340;
   const previewHeight = Math.round(previewWidth / aspectRatio);
 
   return (

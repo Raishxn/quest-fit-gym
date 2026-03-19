@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Search, UserPlus, Check, X, Loader2, UserMinus, Clock, Inbox, Send } from 'lucide-react';
+import { Users, Search, UserPlus, Check, X, Loader2, UserMinus, Clock, Inbox, Send, Dumbbell, ExternalLink } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { SocialFeed } from '@/components/social/SocialFeed';
+import { useNavigate } from 'react-router-dom';
 
 interface FriendProfile {
   user_id: string;
@@ -19,10 +21,15 @@ interface FriendProfile {
   class_name: string;
   avatar_url?: string;
   friendshipId?: string;
+  last_seen?: string;
+  current_workout_status?: string;
+  current_playlist_name?: string;
+  privacy_share_status?: boolean;
 }
 
 export default function FriendsPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [friends, setFriends] = useState<FriendProfile[]>([]);
   const [pendingReceived, setPendingReceived] = useState<FriendProfile[]>([]);
   const [pendingSent, setPendingSent] = useState<FriendProfile[]>([]);
@@ -75,10 +82,12 @@ export default function FriendsPage() {
       return;
     }
 
-    const { data: profiles } = await supabase.from('profiles')
-      .select('user_id, name, username, xp, level, class_name, avatar_url')
+    const response = await supabase.from('profiles')
+      .select('user_id, name, username, xp, level, class_name, avatar_url, last_seen, current_workout_status, current_playlist_name, privacy_share_status')
       .in('user_id', allIds);
-    const profileMap = new Map((profiles || []).map(p => [p.user_id, p]));
+      
+    const profiles = (response.data as any[]) || [];
+    const profileMap = new Map(profiles.map(p => [p.user_id, p]));
 
     setFriends(
       friendIds.map(id => {
@@ -184,9 +193,9 @@ export default function FriendsPage() {
     <div className="space-y-6 max-w-3xl mx-auto">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-3xl font-display font-bold flex items-center gap-2">
-          <Users className="h-8 w-8 text-primary" /> Amigos
+          <Users className="h-8 w-8 text-primary" /> Social
         </h1>
-        <p className="text-muted-foreground">Encontre guerreiros e treine junto!</p>
+        <p className="text-muted-foreground">Compartilhe suas conquistas e acompanhe seus guerreiros!</p>
       </motion.div>
 
       {/* Search */}
@@ -241,10 +250,14 @@ export default function FriendsPage() {
         </Card>
       </motion.div>
 
-      {/* Tabs: Friends / Requests */}
+      {/* Tabs: Feed / Friends / Requests */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-        <Tabs defaultValue="friends">
-          <TabsList className="grid w-full grid-cols-2">
+        <Tabs defaultValue="feed">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="feed" className="gap-1.5">
+              <Inbox className="h-4 w-4" />
+              Feed
+            </TabsTrigger>
             <TabsTrigger value="friends" className="gap-1.5">
               <Users className="h-4 w-4" />
               Amigos
@@ -253,13 +266,18 @@ export default function FriendsPage() {
               )}
             </TabsTrigger>
             <TabsTrigger value="requests" className="gap-1.5">
-              <Inbox className="h-4 w-4" />
+              <UserPlus className="h-4 w-4" />
               Solicitações
               {totalPending > 0 && (
                 <Badge variant="destructive" className="ml-1 text-xs px-1.5 py-0">{totalPending}</Badge>
               )}
             </TabsTrigger>
           </TabsList>
+
+          {/* Social Feed Tab */}
+          <TabsContent value="feed">
+            <SocialFeed />
+          </TabsContent>
 
           {/* Friends Tab */}
           <TabsContent value="friends">
@@ -271,28 +289,52 @@ export default function FriendsPage() {
                     <p className="text-sm text-muted-foreground italic">Nenhum amigo ainda — busque guerreiros acima!</p>
                   </div>
                 ) : (
-                  friends.map(friend => (
+                  friends.map(friend => {
+                    // Check if recently online (last 5 min)
+                    const isOnline = friend.last_seen && (new Date().getTime() - new Date(friend.last_seen).getTime() < 5 * 60 * 1000);
+                    const isTraining = friend.current_workout_status && friend.current_workout_status !== 'idle' && friend.privacy_share_status !== false;
+
+                    return (
                     <motion.div
                       key={friend.user_id}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="flex items-center gap-3 p-3 rounded-lg bg-secondary/50 hover:bg-secondary/70 transition-colors"
+                      className="flex items-center gap-3 p-3 rounded-lg bg-secondary/50 hover:bg-secondary/70 transition-colors cursor-pointer"
+                      onClick={() => navigate(`/profile/${friend.user_id}`)}
                     >
-                      <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary overflow-hidden shrink-0">
-                        {friend.avatar_url
-                          ? <img src={friend.avatar_url} className="w-full h-full object-cover" alt="" />
-                          : friend.name?.charAt(0)}
+                      <div className="relative h-10 w-10 shrink-0">
+                        <div className={`h-full w-full rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary overflow-hidden ${isOnline ? 'ring-2 ring-green-500' : 'ring-1 ring-border'}`}>
+                          {friend.avatar_url
+                            ? <img src={friend.avatar_url} className="w-full h-full object-cover" alt="" />
+                            : friend.name?.charAt(0)}
+                        </div>
+                        {/* Online/offline dot */}
+                        <div className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-background ${isOnline ? 'bg-green-500' : 'bg-gray-500'}`} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-sm truncate">{friend.name}</p>
-                        <p className="text-xs text-muted-foreground">@{friend.username} • Nv.{friend.level} {friend.class_name}</p>
+                        <p className="text-xs text-muted-foreground flex items-center gap-1">
+                          @{friend.username} • Nv.{friend.level} {friend.class_name}
+                        </p>
+                        {isTraining && (
+                          <div className="flex items-center gap-1 mt-1">
+                            <Badge variant="outline" className="text-[10px] gap-1 px-1.5 py-0 bg-primary/10 border-primary/20 text-primary">
+                              <Dumbbell className="h-3 w-3" /> 
+                              {friend.current_workout_status === 'freestyle' ? 'Treino Livre' : `Playlist: ${friend.current_playlist_name || 'Desconhecida'}`}
+                              <span className="relative flex h-2 w-2 ml-1">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                              </span>
+                            </Badge>
+                          </div>
+                        )}
                       </div>
                       <span className="font-mono text-xs text-primary shrink-0">{friend.xp?.toLocaleString()} XP</span>
                       <Button
                         size="icon"
                         variant="ghost"
                         className="text-muted-foreground hover:text-destructive shrink-0"
-                        onClick={() => friend.friendshipId && removeFriend(friend.friendshipId, friend.name)}
+                        onClick={(e) => { e.stopPropagation(); friend.friendshipId && removeFriend(friend.friendshipId, friend.name); }}
                         disabled={actionLoading === friend.friendshipId}
                         title="Remover amigo"
                       >
@@ -302,7 +344,8 @@ export default function FriendsPage() {
                         }
                       </Button>
                     </motion.div>
-                  ))
+                    );
+                  })
                 )}
               </CardContent>
             </Card>

@@ -15,7 +15,7 @@ export function ClassSelectorDialog({ onSelected }: { onSelected?: () => void })
   const [classes, setClasses] = useState<any[]>([]);
   const [classXPMap, setClassXPMap] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
-  const [archetypeFilter, setArchetypeFilter] = useState('Guerreiro');
+  const [archetypeFilter, setArchetypeFilter] = useState('Força');
 
   useEffect(() => {
     if (open) {
@@ -34,13 +34,13 @@ export function ClassSelectorDialog({ onSelected }: { onSelected?: () => void })
     setClasses(data || []);
     if (xpData) {
       const xpMap: Record<string, number> = {};
-      xpData.forEach((r: any) => xpMap[r.class_key] = r.current_xp);
+      xpData.forEach((r: any) => xpMap[r.class_id] = r.class_xp);
       setClassXPMap(xpMap);
     }
     setLoading(false);
   };
 
-  const archetypes = ['Guerreiro', 'Ranger', 'Mago', 'Monge', 'Paladino', 'Assassino', 'Bardo', 'Druida'];
+  const archetypes = ['Força', 'Resistência', 'Equilíbrio', 'Agilidade', 'Cardio', 'Híbrido', 'Disciplina', 'Combate'];
 
   const selectClass = async (classId: string) => {
     const { error } = await supabase
@@ -49,7 +49,8 @@ export function ClassSelectorDialog({ onSelected }: { onSelected?: () => void })
       .eq('user_id', user!.id);
 
     if (error) {
-      toast.error('Erro ao escolher classe.');
+      console.error('Class selection Error:', error);
+      toast.error(`Erro ao escolher classe: ${error.message}`);
     } else {
       toast.success('Classe escolhida com sucesso! Seus buffs estão ativos.');
       await refreshProfile();
@@ -150,12 +151,19 @@ export function ClassSelectorDialog({ onSelected }: { onSelected?: () => void })
                           <div className="grid grid-cols-2 gap-2 mt-2">
                              <div className="bg-primary/10 p-1.5 rounded text-center border border-primary/20">
                                <p className="text-[10px] text-primary font-bold">BUFF</p>
-                               <p className="text-xs font-mono">+{Math.round((c.bonus_value - 1) * 100 * stats.mult)}% {c.bonus_type.replace('_xp', '').substring(0,3).toUpperCase()}</p>
+                               <p className="text-xs font-mono">+{Math.round(c.bonus_value * stats.mult)}% {c.bonus_type.replace('_xp', '').substring(0,3).toUpperCase()}</p>
                              </div>
-                             <div className="bg-destructive/10 p-1.5 rounded text-center border border-destructive/20">
-                               <p className="text-[10px] text-destructive font-bold">DEBUFF</p>
-                               <p className="text-[10px] font-mono opacity-80 pt-0.5">-{Math.round(5 * stats.mult)}% OUTROS</p>
-                             </div>
+                             {(c.debuff_value && c.debuff_value > 0) ? (
+                               <div className="bg-destructive/10 p-1.5 rounded text-center border border-destructive/20">
+                                 <p className="text-[10px] text-destructive font-bold">DEBUFF</p>
+                                 <p className="text-[10px] font-mono opacity-80 pt-0.5">-{Math.round(c.debuff_value * stats.mult)}% {c.debuff_type ? c.debuff_type.replace('_xp', '').substring(0,3).toUpperCase() : 'OUTROS'}</p>
+                               </div>
+                             ) : (
+                               <div className="bg-secondary/10 p-1.5 rounded text-center border border-secondary/20">
+                                 <p className="text-[10px] text-muted-foreground font-bold">DEBUFF</p>
+                                 <p className="text-[10px] font-mono opacity-80 pt-0.5">NENHUM</p>
+                               </div>
+                             )}
                           </div>
                         </div>
                       </CardContent>

@@ -1,132 +1,162 @@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { MISSION_TEMPLATES } from './mission-templates-seed';
-import type { Database } from '@/integrations/supabase/types';
 
-export type MissionTemplate = Database['public']['Tables']['mission_templates']['Row'];
-export type ActiveMission = Database['public']['Tables']['active_missions']['Row'] & {
-  template: MissionTemplate;
-};
-export type GlobalMission = Database['public']['Tables']['global_missions']['Row'] & {
-  template: MissionTemplate;
-};
+// ─── Types matching the actual DB schema ──────────────────────────────────────
+export interface MissionTemplate {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  type: 'daily' | 'weekly' | 'monthly';
+  objective_type: string;
+  objective_value: number;
+  xp_reward: number;
+  coin_reward: number;
+  is_active: boolean;
+  created_at: string;
+}
 
-export const fetchActiveMissions = async (userId: string) => {
+export interface ActiveMission {
+  id: string;
+  user_id: string;
+  mission_id: string;
+  current_value: number;
+  target_value: number;
+  completed: boolean;
+  claimed: boolean;
+  expires_at: string | null;
+  started_at: string;
+  completed_at: string | null;
+  template: MissionTemplate;
+}
+
+const AM = 'active_missions' as any;
+const MT = 'mission_templates' as any;
+
+// ─── Fetch active missions for a user ─────────────────────────────────────────
+export const fetchActiveMissions = async (userId: string): Promise<ActiveMission[]> => {
   const { data, error } = await supabase
-    .from('active_missions')
+    .from(AM)
     .select('*, template:mission_templates(*)')
     .eq('user_id', userId)
-    .in('status', ['pending', 'completed'])
+    .eq('claimed', false)
     .order('started_at', { ascending: false });
 
   if (error) {
-    console.error('Error fetching active missions:', error);
+    console.error('Erro ao buscar missões:', error);
     toast.error(`BD Erro (Fetch Missões): ${error.message}`);
     return [];
   }
-  return data as unknown as ActiveMission[];
+  return (data || []) as unknown as ActiveMission[];
 };
 
+// ─── Claim mission reward ──────────────────────────────────────────────────────
 export const claimMissionReward = async (missionId: string, userId: string) => {
-  // 1. Check if mission is completed
   const { data: mission, error: getErr } = await supabase
-    .from('active_missions')
+    .from(AM)
     .select('*, template:mission_templates(*)')
     .eq('id', missionId)
     .single();
 
   if (getErr || !mission) throw getErr;
-  if (mission.status !== 'completed') throw new Error('Missão ainda não concluída.');
+  const m = mission as unknown as ActiveMission;
+  if (!m.completed) throw new Error('Missão ainda não concluída.');
+  if (m.claimed) throw new Error('Recompensa já coletada.');
 
-  const template = mission.template as unknown as MissionTemplate;
+  const template = m.template as MissionTemplate;
 
-  // 2. Mark as claimed
   await supabase
-    .from('active_missions')
-    .update({ status: 'claimed' })
+    .from(AM)
+    .update({ claimed: true, completed_at: new Date().toISOString() } as any)
     .eq('id', missionId);
 
-  // 3. Award XP and PM
   if (template.xp_reward > 0) {
-    await supabase.from('xp_transactions').insert({
-      user_id: userId,
-      amount: template.xp_reward,
-      source: 'mission_reward',
-      source_id: missionId
-    });
-    
-    // update profile XP
-    const { data: profile } = await supabase.from('profiles').select('xp, level').eq('user_id', userId).single();
-    if (profile) {
-        // level logic is normally handled somewhere else but let's just update xp for now.
-      await supabase.from('profiles').update({ xp: profile.xp + template.xp_reward }).eq('user_id', userId);
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('xp')
+      .eq('user_id', userId)
+      .single();
+
+    if (profileData) {
+      await supabase
+        .from('profiles')
+        .update({ xp: (profileData.xp || 0) + template.xp_reward })
+        .eq('user_id', userId);
     }
   }
 
-  if (template.mastery_points_reward > 0) {
-    const { data: profile } = await supabase.from('profiles').select('overall_mastery_points').eq('user_id', userId).single();
-    if (profile) {
-      await supabase.from('profiles').update({ 
-        overall_mastery_points: (profile.overall_mastery_points || 0) + template.mastery_points_reward 
-      }).eq('user_id', userId);
-    }
-  }
-
-  return true;
-};
-
-export const fetchGlobalMissions = async () => {
-  const { data, error } = await supabase
-    .from('global_missions')
-    .select('*, template:mission_templates(*)')
-    .eq('status', 'active');
-    
-  if (error) {
-    console.error('Error fetching global missions', error);
-    return [];
-  }
-  return data as unknown as GlobalMission[];
+  return { xpReward: template.xp_reward, coinReward: template.coin_reward };
 };
 
 export const checkAndGenerateDailyMissions = async (userId: string) => {
-  // Generate Daily, Weekly, Monthly, and Master missions
-  const types: ('daily' | 'weekly' | 'monthly' | 'master')[] = ['daily', 'weekly', 'monthly', 'master'];
-  
-  for (const t of types) {
-    const { data: existing } = await supabase
-      .from('active_missions')
-      .select('id')
+  // Batch fetch all active templates and all user's active un-claimed missions
+  const [templatesRes, existingRes] = await Promise.all([
+    supabase.from(MT).select('*').eq('is_active', true),
+    supabase.from(AM)
+      .select('id, mission_id')
       .eq('user_id', userId)
-      .eq('type', t)
-      .in('status', ['pending', 'completed']);
+      .eq('claimed', false)
+  ]);
 
-    // Se o usuário não possui missões relativas a este período, gera!
-    if (!existing || existing.length === 0) {
-      const limit = t === 'master' ? 1 : 3;
-      const { data: templates } = await supabase
-        .from('mission_templates')
-        .select('*')
-        .eq('type', t);
+  if (!templatesRes.data || templatesRes.data.length === 0) return;
+  const templates = templatesRes.data as unknown as MissionTemplate[];
+  const existing = existingRes.data || [];
+  const assignedMissionIds = new Set(existing.map((m: any) => m.mission_id));
 
-      if (templates && templates.length > 0) {
-        // Embaralhando as templates para virem sempre novas missões diferentes
-        const shuffled = templates.sort(() => 0.5 - Math.random());
-        const selected = shuffled.slice(0, limit);
+  const types: ('daily' | 'weekly' | 'monthly')[] = ['daily', 'weekly', 'monthly'];
+  const newMissionsToInsert: any[] = [];
+  const now = new Date();
 
-        const newMissions = selected.map(temp => ({
-          user_id: userId,
-          template_id: temp.id,
-          type: t,
-          target: (temp as any).target || (temp.criteria as any)?.count || 1,
-          progress: 0,
-          status: 'pending'
-        }));
-        const { error: insErr } = await supabase.from('active_missions').insert(newMissions);
-        if (insErr) {
-           console.error(`Erro inserindo missões ${t}:`, insErr);
-           toast.error(`BD Erro (Insert ${t}): ${insErr.message}`);
-        }
-      }
+  for (const t of types) {
+    const typeTemplates = templates.filter((tmpl: any) => tmpl.type === t);
+    if (typeTemplates.length === 0) continue;
+
+    const existingOfType = existing.filter((m: any) => {
+      const tmpl = templates.find((temp: any) => temp.id === m.mission_id);
+      return tmpl && tmpl.type === t;
+    });
+
+    const needed = Math.max(0, 3 - existingOfType.length);
+    if (needed === 0) continue;
+
+    const available = typeTemplates.filter((tmpl: any) => !assignedMissionIds.has(tmpl.id));
+    const shuffled = available.sort(() => 0.5 - Math.random());
+    const selected = shuffled.slice(0, needed);
+
+    if (selected.length === 0) continue;
+
+    let expiresAt: Date;
+    if (t === 'daily') {
+      expiresAt = new Date(now);
+      expiresAt.setHours(23, 59, 59, 999);
+    } else if (t === 'weekly') {
+      const daysUntilSunday = 7 - now.getDay() || 7;
+      expiresAt = new Date(now);
+      expiresAt.setDate(now.getDate() + daysUntilSunday);
+      expiresAt.setHours(23, 59, 59, 999);
+    } else {
+      expiresAt = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+    }
+
+    selected.forEach((tmpl: any) => {
+      newMissionsToInsert.push({
+        user_id: userId,
+        mission_id: tmpl.id,
+        current_value: 0,
+        target_value: tmpl.objective_value,
+        completed: false,
+        claimed: false,
+        expires_at: expiresAt.toISOString(),
+      });
+    });
+  }
+
+  // Insert all new missions in a single batched query
+  if (newMissionsToInsert.length > 0) {
+    const { error: insErr } = await supabase.from(AM).insert(newMissionsToInsert);
+    if (insErr) {
+      console.error('Erro inserindo missões:', insErr);
+      toast.error(`BD Erro (Insert): ${insErr.message}`);
     }
   }
 };

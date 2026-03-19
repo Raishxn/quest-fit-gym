@@ -14,11 +14,20 @@ serve(async (req) => {
   }
 
   try {
-    const { code, userId } = await req.json();
+    const { code } = await req.json();
 
-    if (!code || !userId) {
-      throw new Error("Missing required parameters: code, userId");
+    if (!code) {
+      throw new Error("Missing required parameter: code");
     }
+
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) throw new Error("No authorization header");
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: userData, error: userError } = await supabase.auth.getUser(token);
+    if (userError || !userData?.user) throw new Error(`Auth error: ${userError?.message || 'User not found'}`);
+    
+    const userId = userData.user.id;
 
     // Find the code
     const { data: giftCode, error: codeError } = await supabase

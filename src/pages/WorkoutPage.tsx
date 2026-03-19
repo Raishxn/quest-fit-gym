@@ -68,8 +68,11 @@ export default function WorkoutPage() {
   const [equipmentFilter, setEquipmentFilter] = useState<string>('all');
   const [sessionTimer, setSessionTimer] = useState(0);
   
-  // Rank up animation
+  // Rank up animation  
   const [rankUpInfo, setRankUpInfo] = useState<{ exercise: string; oldRank: string; newRank: string } | null>(null);
+  // Session summary / share
+  const [sessionSummary, setSessionSummary] = useState<{ xpGained: number; totalSets: number; totalVolume: number; durationMin: number; sessionId: string } | null>(null);
+  const [shareCaption, setShareCaption] = useState('');
 
   useEffect(() => {
     if (!user) return;
@@ -343,9 +346,29 @@ export default function WorkoutPage() {
     }).eq('user_id', user.id);
 
     toast.success(`🎉 Treino finalizado! +${xpGained} XP — ${totalSets} séries, ${totalVolume.toLocaleString()}kg volume`);
+    // Show summary instead of immediately clearing
+    setSessionSummary({ xpGained, totalSets, totalVolume, durationMin, sessionId: activeSession.id });
     setActiveSession(null);
     setActiveExercises([]);
     loadData();
+  };
+
+  const handleShareSession = async (sessionId: string, summary: typeof sessionSummary, caption: string, share: boolean) => {
+    if (share && summary) {
+      await supabase.from('social_posts' as any).insert({
+        user_id: user!.id,
+        content: caption || null,
+        workout_summary: {
+          duration_min: summary.durationMin,
+          total_sets: summary.totalSets,
+          total_volume_kg: summary.totalVolume,
+          xp_gained: summary.xpGained,
+        },
+        session_id: sessionId,
+      });
+      toast.success('Sessão compartilhada no Feed Social! 🏆');
+    }
+    setSessionSummary(null);
   };
 
   const abandonWorkout = async () => {
@@ -587,6 +610,54 @@ export default function WorkoutPage() {
             </Dialog>
           )}
         </AnimatePresence>
+
+        {/* Session Summary & Share Dialog */}
+        <Dialog open={!!sessionSummary} onOpenChange={(open) => { if (!open) setSessionSummary(null); }}>
+          <DialogContent className="space-y-4">
+            <DialogHeader>
+              <DialogTitle className="font-display text-2xl text-center">🏆 Treino Concluído!</DialogTitle>
+            </DialogHeader>
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="space-y-4">
+              {sessionSummary && (
+                <>
+                  {/* Stats Grid */}
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { label: 'Duração', value: `${sessionSummary.durationMin} min`, emoji: '⏱️' },
+                      { label: 'Volume', value: `${sessionSummary.totalVolume.toLocaleString()} kg`, emoji: '🏋️' },
+                      { label: 'Séries', value: String(sessionSummary.totalSets), emoji: '📊' },
+                      { label: 'XP Ganho', value: `+${sessionSummary.xpGained} XP`, emoji: '⚔️' },
+                    ].map(s => (
+                      <div key={s.label} className="bg-secondary/60 rounded-xl p-3 text-center border border-border">
+                        <span className="text-2xl">{s.emoji}</span>
+                        <p className="font-bold font-mono text-lg mt-1">{s.value}</p>
+                        <p className="text-xs text-muted-foreground">{s.label}</p>
+                      </div>
+                    ))}
+                  </div>
+                  {/* Share section */}
+                  <div className="space-y-2 pt-2 border-t border-border">
+                    <p className="text-sm font-medium text-center">Compartilhar no Feed Social?</p>
+                    <Input
+                      placeholder="Adicionar uma legenda... (opcional)"
+                      value={shareCaption}
+                      onChange={e => setShareCaption(e.target.value)}
+                      className="text-sm"
+                    />
+                    <div className="grid grid-cols-2 gap-2 pt-1">
+                      <Button variant="outline" onClick={() => { setShareCaption(''); handleShareSession(sessionSummary.sessionId, sessionSummary, '', false); }}>
+                        Fechar
+                      </Button>
+                      <Button className="font-display" onClick={() => { handleShareSession(sessionSummary.sessionId, sessionSummary, shareCaption, true); setShareCaption(''); }}>
+                        🚀 Compartilhar
+                      </Button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </motion.div>
+          </DialogContent>
+        </Dialog>
       </div>
     );
   }

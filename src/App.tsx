@@ -20,12 +20,16 @@ import PlaylistPage from "./pages/PlaylistPage";
 import ProgressPage from "./pages/ProgressPage";
 import SettingsPage from "./pages/SettingsPage";
 import UpgradePage from "./pages/UpgradePage";
+import SuccessPage from "./pages/SuccessPage";
 import NotFound from "./pages/NotFound";
 import MissionsPage from "./pages/MissionsPage";
 import GuildsPage from "./pages/GuildsPage";
 import UpdatesPage from "./pages/UpdatesPage";
 import TermsPage from "./pages/TermsPage";
 import PrivacyPage from "./pages/PrivacyPage";
+import PublicProfilePage from "./pages/PublicProfilePage";
+import FeedbackPage from "./pages/FeedbackPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +44,7 @@ const App = () => (
             {/* Public auth pages */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
 
             {/* Protected pages */}
             <Route path="/anamnesis" element={
@@ -47,6 +52,9 @@ const App = () => (
             } />
             <Route path="/upgrade" element={
               <ProtectedRoute><UpgradePage /></ProtectedRoute>
+            } />
+            <Route path="/success" element={
+              <ProtectedRoute><SuccessPage /></ProtectedRoute>
             } />
 
             {/* Dashboard (protected) */}
@@ -59,6 +67,7 @@ const App = () => (
               <Route path="/cardio" element={<CardioPage />} />
               <Route path="/ranking" element={<RankingPage />} />
               <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/profile/:userId" element={<PublicProfilePage />} />
               <Route path="/friends" element={<FriendsPage />} />
               <Route path="/playlists" element={<PlaylistPage />} />
               <Route path="/progress" element={<ProgressPage />} />
@@ -68,6 +77,7 @@ const App = () => (
               <Route path="/updates" element={<UpdatesPage />} />
               <Route path="/terms" element={<TermsPage />} />
               <Route path="/privacy" element={<PrivacyPage />} />
+              <Route path="/feedback" element={<FeedbackPage />} />
             </Route>
 
             <Route path="/" element={<Navigate to="/home" replace />} />

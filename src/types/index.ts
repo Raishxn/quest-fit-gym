@@ -43,6 +43,31 @@ export interface UserProfile {
   } | null;
   role?: 'user' | 'admin';
   has_seen_tutorial?: boolean;
+  name_effect?: Record<string, any>;
+  profile_gradient?: string;
+  profile_wallpaper_url?: string;
+  avatar_frame?: string;
+  is_owner?: boolean;
+}
+
+export interface Title {
+  id: string;
+  name: string;
+  description: string;
+  buff_type: string | null;
+  buff_value: number | null;
+  requirement_type: string | null;
+  requirement_value: number | null;
+  is_unique: boolean;
+}
+
+export interface UserTitle {
+  id: string;
+  user_id: string;
+  title_id: string;
+  unlocked_at: string;
+  is_equipped: boolean;
+  title?: Title; // used for joins
 }
 
 export interface Achievement {

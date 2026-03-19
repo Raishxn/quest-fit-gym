@@ -87,7 +87,13 @@ export default function RankingPage() {
       }
     }
 
-    // 3. Execute
+    // 3. Exclude the owner from rankings
+    if (mainTab !== 'guilds') {
+      const isOwnerFilter = mainTab === 'exercises' ? 'profiles.is_owner' : 'is_owner';
+      query = query.neq(isOwnerFilter, true);
+    }
+
+    // 4. Execute
     const { data: result, error } = await query.limit(50);
     if (error) console.error("Ranking Fetch Error:", error);
     

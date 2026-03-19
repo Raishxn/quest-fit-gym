@@ -15,22 +15,54 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 export default function SettingsPage() {
-  const { profile } = useAuth();
+  const { user, profile } = useAuth();
   const [giftCodes, setGiftCodes] = useState<any[]>([]);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [loadingPortal, setLoadingPortal] = useState(false);
+  const [loadingAccount, setLoadingAccount] = useState(false);
+  const [shareStatus, setShareStatus] = useState(true);
+
+  // Account States
+  const [name, setName] = useState(profile?.name || '');
+  const [username, setUsername] = useState(profile?.username || '');
+  const [email, setEmail] = useState(profile?.email || '');
 
   useEffect(() => {
     if (profile) {
+      setName(profile.name);
+      setUsername(profile.username);
+      setEmail(profile.email);
       fetchGiftCodes();
+      loadPrivacySettings();
     }
   }, [profile]);
 
+  const loadPrivacySettings = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from('profiles')
+      .select('privacy_share_status')
+      .eq('user_id', user.id)
+      .single();
+    if (data && 'privacy_share_status' in data) {
+      setShareStatus(data.privacy_share_status as boolean ?? true);
+    }
+  };
+
+  const toggleShareStatus = async (val: boolean) => {
+    setShareStatus(val);
+    if (!user) return;
+    await supabase
+      .from('profiles')
+      .update({ privacy_share_status: val } as any)
+      .eq('user_id', user.id);
+  };
+
   const fetchGiftCodes = async () => {
     const { data } = await supabase
-      .from('gift_codes')
+      .from('gift_codes' as any)
       .select('*')
-      .eq('creator_user_id', profile?.id)
+      .eq('creator_user_id', user?.id)
       .order('created_at', { ascending: false });
     
     if (data) setGiftCodes(data);
@@ -46,7 +78,7 @@ export default function SettingsPage() {
   const handleManageSubscription = async () => {
     try {
       setLoadingPortal(true);
-      const { data, error } = await supabase.functions.invoke('create-portal-session', {
+      const { data, error } = await supabase.functions.invoke('customer-portal', {
         body: { userId: profile?.id }
       });
       if (error) throw error;
@@ -59,6 +91,43 @@ export default function SettingsPage() {
     } finally {
       setLoadingPortal(false);
     }
+  };
+
+  const handleSaveAccount = async () => {
+    if (!user || !profile) return;
+    setLoadingAccount(true);
+    let emailChanged = false;
+
+    // Update Profile
+    if (name !== profile.name || username !== profile.username) {
+      const { error } = await supabase.from('profiles').update({
+        name,
+        username
+      }).eq('user_id', user.id);
+      
+      if (error) {
+        toast.error(`Erro ao atualizar perfil: ${error.message}`);
+        setLoadingAccount(false);
+        return;
+      }
+    }
+
+    // Update Email in Auth
+    if (email !== profile.email) {
+      const { error: authError } = await supabase.auth.updateUser({ email });
+      if (authError) {
+        toast.error(`Erro ao atualizar email: ${authError.message}`);
+        setLoadingAccount(false);
+        return;
+      }
+      emailChanged = true;
+    }
+
+    toast.success(emailChanged 
+      ? 'Perfil salvo! Se você trocou o e-mail, verifique a caixa de entrada de AMBOS os e-mails para confirmar a mudança.' 
+      : 'Perfil atualizado com sucesso!'
+    );
+    setLoadingAccount(false);
   };
 
   if (!profile) return null;
@@ -87,11 +156,13 @@ export default function SettingsPage() {
             <CardHeader><CardTitle className="font-display">Conta</CardTitle></CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2"><Label>Nome</Label><Input defaultValue={profile.name} /></div>
-                <div className="space-y-2"><Label>Username</Label><Input defaultValue={profile.username} /></div>
-                <div className="space-y-2"><Label>Email</Label><Input defaultValue={profile.email} disabled /></div>
+                <div className="space-y-2"><Label>Nome</Label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
+                <div className="space-y-2"><Label>Username</Label><Input value={username} onChange={(e) => setUsername(e.target.value)} /></div>
+                <div className="space-y-2"><Label>Email</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
               </div>
-              <Button className="font-display">Salvar Alterações</Button>
+              <Button className="font-display" onClick={handleSaveAccount} disabled={loadingAccount}>
+                {loadingAccount ? 'Salvando...' : 'Salvar Alterações'}
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>
@@ -148,9 +219,16 @@ export default function SettingsPage() {
                   ))}
                 </div>
               </div>
-              {['Histórico de treinos', 'PRs', 'Conquistas', 'Status online'].map((item) => (
+              {['Histórico de treinos', 'PRs', 'Conquistas'].map((item) => (
                 <div key={item} className="flex items-center justify-between"><Label>Ocultar {item.toLowerCase()}</Label><Switch /></div>
               ))}
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Compartilhar status de treino</Label>
+                  <p className="text-xs text-muted-foreground">Amigos podem ver quando você está treinando e com qual playlist</p>
+                </div>
+                <Switch checked={shareStatus} onCheckedChange={toggleShareStatus} />
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

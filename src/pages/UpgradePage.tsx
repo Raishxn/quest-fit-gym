@@ -158,17 +158,15 @@ export default function UpgradePage() {
 
     try {
       const price = plan.prices[interval];
+      const priceId = price.priceId; // Define priceId here
 
-      const { data, error } = await supabase.functions.invoke('create-checkout-session', {
-        body: {
-          priceId: price.priceId,
-          userId: user.id,
-          plan: plan.id,
-          interval,
-        },
+      setLoading(priceId); // This line was added from the instruction
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: { priceId, plan: plan.id, interval, userId: user.id } // Adjusted body based on instruction and original context
       });
 
       if (error) throw error;
+      
       if (data?.url) {
         window.location.href = data.url;
       }
@@ -209,8 +207,16 @@ export default function UpgradePage() {
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-12">
       {/* Header */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-        <div className="text-center space-y-2">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="relative">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="absolute left-0 top-0 md:-left-4 md:-top-4" 
+          onClick={() => window.history.back()}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-arrow-left h-5 w-5"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+        </Button>
+        <div className="text-center space-y-2 pt-8 md:pt-0">
           <h1 className="text-4xl font-display font-bold bg-gradient-to-r from-amber-400 via-orange-400 to-red-400 bg-clip-text text-transparent">
             Level Up Seu Plano ⚔️
           </h1>

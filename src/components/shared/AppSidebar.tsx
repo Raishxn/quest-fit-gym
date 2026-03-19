@@ -1,4 +1,4 @@
-import { Home, Dumbbell, ListMusic, Salad, Activity, TrendingUp, Trophy, Users, User, Settings, Swords, Target, Shield } from 'lucide-react';
+import { Home, Dumbbell, ListMusic, Salad, Activity, TrendingUp, Trophy, Users, User, Settings, Swords, Target, Shield, MessageSquare } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -16,6 +16,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
+import { PlanBadge } from '@/components/shared/PlanBadge';
 
 const navItems = [
   { title: 'Home', url: '/home', icon: Home },
@@ -27,7 +28,8 @@ const navItems = [
   { title: 'Cardio', url: '/cardio', icon: Activity },
   { title: 'Progresso', url: '/progress', icon: TrendingUp },
   { title: 'Ranking', url: '/ranking', icon: Trophy },
-  { title: 'Amigos', url: '/friends', icon: Users },
+  { title: 'Social', url: '/friends', icon: Users },
+  { title: 'Feedback', url: '/feedback', icon: MessageSquare },
   { title: 'Perfil', url: '/profile', icon: User },
   { title: 'Configurações', url: '/settings', icon: Settings },
 ];
@@ -91,7 +93,10 @@ export function AppSidebar() {
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{profile.name}</p>
+                <div className="flex items-center gap-2 mb-0.5">
+                  <p className="text-sm font-medium truncate">{profile.name}</p>
+                  <PlanBadge plan={profile.plan} className="scale-90 origin-left" />
+                </div>
                 <LevelBadge level={profile.level} className={profile.className} size="sm" />
               </div>
             </div>

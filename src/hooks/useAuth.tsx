@@ -32,7 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const fetchProfile = async (userId: string) => {
     let { data, error } = (await supabase
       .from('profiles')
-      .select('*, classes(*)')
+      .select('*, classes!profiles_current_class_id_fkey(*)')
       .eq('user_id', userId)
       .maybeSingle()) as any;
       
@@ -67,7 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         avatarUrl: data.avatar_url || undefined,
         bannerUrl: data.banner_url || undefined,
         frameUrl: data.frame_url || undefined,
-        isPremium: data.is_premium || false,
+        isPremium: data.plan && data.plan !== 'free',
         avatarGlowColor: data.avatar_glow_color || undefined,
         nameColor: data.name_color || undefined,
         profileFont: data.profile_font || undefined,
@@ -95,6 +95,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } : null,
         role: data.role || 'user',
         has_seen_tutorial: data.has_seen_tutorial || false,
+        name_effect: data.name_effect || {},
+        profile_gradient: data.profile_gradient || '',
+        profile_wallpaper_url: data.profile_wallpaper_url || '',
+        avatar_frame: data.avatar_frame || 'none',
+        is_owner: data.is_owner || false,
       };
       setProfile(p);
 
@@ -108,6 +113,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (event === 'PASSWORD_RECOVERY') {
+          window.location.href = '/reset-password';
+          return;
+        }
+
         setSession(session);
         setUser(session?.user ?? null);
 

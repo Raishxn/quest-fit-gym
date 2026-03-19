@@ -24,7 +24,7 @@ serve(async (req) => {
     const user = data.user;
     if (!user?.email) throw new Error("User not authenticated");
 
-    const { priceId } = await req.json();
+    const { priceId, plan, interval } = await req.json();
     if (!priceId) throw new Error("priceId is required");
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
@@ -44,10 +44,10 @@ serve(async (req) => {
       customer_email: customerId ? undefined : user.email,
       line_items: [{ price: priceId, quantity: 1 }],
       mode: "subscription",
-      success_url: `${origin}/settings?tab=plan&success=true`,
+      success_url: `${origin}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/upgrade`,
       allow_promotion_codes: true,
-      metadata: { userId: user.id },
+      metadata: { userId: user.id, plan: plan || 'vip', interval: interval || 'monthly' },
     });
 
     return new Response(JSON.stringify({ url: session.url }), {

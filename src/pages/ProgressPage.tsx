@@ -114,11 +114,11 @@ export default function ProgressPage() {
 
   const logBodyWeight = async () => {
     if (!user || !newWeight) return;
-    const { error } = await supabase.from('body_measurements').insert({
+    const { error } = await supabase.from('body_weight_logs').insert({
       user_id: user.id,
       weight_kg: Number(newWeight),
-      measured_at: new Date().toISOString(),
-    });
+      date: new Date().toISOString().slice(0, 10),
+    } as any);
     if (error) { toast.error('Erro ao salvar'); return; }
     toast.success('Peso registrado!');
     setNewWeight('');

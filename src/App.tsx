@@ -6,6 +6,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/shared/ProtectedRoute";
 import { DashboardLayout } from "@/layouts/DashboardLayout";
+import { AdminLayout } from "@/layouts/AdminLayout";
+import { AdminGuard } from "@/components/auth/AdminGuard";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import AnamnesisPage from "./pages/AnamnesisPage";
@@ -30,6 +32,10 @@ import PrivacyPage from "./pages/PrivacyPage";
 import PublicProfilePage from "./pages/PublicProfilePage";
 import FeedbackPage from "./pages/FeedbackPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminUsersPage from "./pages/admin/AdminUsersPage";
+import AdminGiftCodesPage from "./pages/admin/AdminGiftCodesPage";
+import AdminExercisesPage from "./pages/admin/AdminExercisesPage";
 
 const queryClient = new QueryClient();
 
@@ -56,6 +62,16 @@ const App = () => (
             <Route path="/success" element={
               <ProtectedRoute><SuccessPage /></ProtectedRoute>
             } />
+
+            {/* Admin (protected + admin guard) */}
+            <Route element={<ProtectedRoute><AdminGuard /></ProtectedRoute>}>
+              <Route element={<AdminLayout />}>
+                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/admin/users" element={<AdminUsersPage />} />
+                <Route path="/admin/gift-codes" element={<AdminGiftCodesPage />} />
+                <Route path="/admin/exercises" element={<AdminExercisesPage />} />
+              </Route>
+            </Route>
 
             {/* Dashboard (protected) */}
             <Route element={

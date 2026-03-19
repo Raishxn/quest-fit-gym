@@ -43,19 +43,38 @@ export function ClassSelectorDialog({ onSelected }: { onSelected?: () => void })
   const archetypes = ['Força', 'Resistência', 'Equilíbrio', 'Agilidade', 'Cardio', 'Híbrido', 'Disciplina', 'Combate'];
 
   const selectClass = async (classId: string) => {
-    const { error } = await supabase
-      .from('profiles')
-      .update({ current_class_id: classId } as any)
-      .eq('user_id', user!.id);
+    if (!user) return;
 
-    if (error) {
-      console.error('Class selection Error:', error);
-      toast.error(`Erro ao escolher classe: ${error.message}`);
-    } else {
-      toast.success('Classe escolhida com sucesso! Seus buffs estão ativos.');
-      await refreshProfile();
-      setOpen(false);
-      if (onSelected) onSelected();
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ current_class_id: classId } as any)
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Class selection Error:', error);
+        toast.error(`Erro ao escolher classe: ${error.message}`);
+      } else {
+        // Create progress row if it doesn't exist
+        const { error: xpError } = await supabase
+          .from('user_class_progress' as any)
+          .upsert(
+             { user_id: user.id, class_id: classId, class_xp: 0, class_level: 1, class_rank: 'Iniciante' },
+             { onConflict: 'user_id,class_id', ignoreDuplicates: true }
+          );
+        
+        if (xpError) {
+          console.error("XP Upsert error:", xpError);
+        }
+
+        toast.success('Classe escolhida com sucesso! Seus buffs estão ativos.');
+        await refreshProfile();
+        setOpen(false);
+        if (onSelected) onSelected();
+      }
+    } catch (err: any) {
+      console.error('Select event Error:', err);
+      toast.error('Ocorreu um erro ao escolher a classe.');
     }
   };
 
@@ -130,8 +149,8 @@ export function ClassSelectorDialog({ onSelected }: { onSelected?: () => void })
                     exit={{ opacity: 0, scale: 0.95 }}
                   >
                     <Card className={`relative overflow-hidden group border-2 ${profile?.current_class_id === c.id ? 'border-primary' : 'border-border'}`}>
-                      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                      <CardHeader className="pb-2">
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-0" />
+                      <CardHeader className="pb-2 relative z-10">
                         <div className="flex justify-between items-start">
                           <span className="text-3xl">{c.icon_emoji}</span>
                           <span className={`text-[10px] font-bold uppercase ${getRarityColor(c.rarity)}`}>{c.rarity}</span>
@@ -139,7 +158,7 @@ export function ClassSelectorDialog({ onSelected }: { onSelected?: () => void })
                         <CardTitle className="text-lg">{c.name}</CardTitle>
                         <CardDescription className="text-xs leading-tight">{c.description}</CardDescription>
                       </CardHeader>
-                      <CardContent>
+                      <CardContent className="relative z-10">
                         <div className="p-3 rounded bg-secondary/30 border border-border space-y-2">
                           <div className="flex justify-between text-[10px] mb-1">
                              <span className="font-bold text-primary">{stats.title}</span>
@@ -167,7 +186,7 @@ export function ClassSelectorDialog({ onSelected }: { onSelected?: () => void })
                           </div>
                         </div>
                       </CardContent>
-                      <CardFooter>
+                      <CardFooter className="relative z-10">
                         <Button 
                           className="w-full font-bold" 
                           variant={profile?.current_class_id === c.id ? 'secondary' : 'default'}

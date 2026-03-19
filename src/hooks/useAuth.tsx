@@ -44,6 +44,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .eq('user_id', userId)
         .maybeSingle();
       data = fallback.data;
+
+      // Try to manually fetch the class if current_class_id is present
+      if (data && data.current_class_id) {
+         const classRes = await supabase.from('classes' as any).select('*').eq('id', data.current_class_id).maybeSingle();
+         if (classRes.data) {
+            data.classes = classRes.data;
+         }
+      }
     }
 
     // Se o usuário apagou o perfil na mão no DB para testar a anamnese:
@@ -59,6 +67,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     if (data) {
+      // Fetch role
+      const roleRes = await supabase
+        .from('user_roles' as any)
+        .select('role')
+        .eq('user_id', userId)
+        .maybeSingle();
+      
+      const userRole = (roleRes.data as any)?.role || 'user';
+
       const p: UserProfile = {
         id: data.id,
         email: data.email || '',
@@ -93,7 +110,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           bonus_value: data.classes.bonus_value,
           icon_emoji: data.classes.icon_emoji,
         } : null,
-        role: data.role || 'user',
+        role: userRole,
         has_seen_tutorial: data.has_seen_tutorial || false,
         name_effect: data.name_effect || {},
         profile_gradient: data.profile_gradient || '',

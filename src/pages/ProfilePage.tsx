@@ -298,10 +298,10 @@ export default function ProfilePage() {
                    <ClassSelectorDialog />
                 </div>
               </div>
-              <div className="flex flex-col items-end gap-2">
-                 <div className="flex items-center gap-1.5">
-                   <LevelBadge level={profile.level} className={profile.className} />
-                   {profile.isPremium && (
+              <div className="space-y-4">
+              <div className="flex justify-between items-center mb-6">
+                 <LevelBadge level={profile.level} className={profile.currentClass?.name || profile.className} />
+                 {profile.specialization && (
                      <button
                        className="h-7 w-7 rounded-full bg-secondary/80 hover:bg-secondary flex items-center justify-center border border-border transition-colors"
                        onClick={() => setShowProfileCustomizer(true)}

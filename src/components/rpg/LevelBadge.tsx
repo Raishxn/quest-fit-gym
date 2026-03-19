@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 
 interface LevelBadgeProps {
   level: number;
-  className?: ClassName;
+  className?: string | ClassName;
   size?: 'sm' | 'md' | 'lg';
   cssClassName?: string;
 }

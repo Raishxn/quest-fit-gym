@@ -108,13 +108,13 @@ export function VIPCustomizerDialog() {
                <p className="text-xs text-muted-foreground mb-3">Escolha um estilo majestoso pré-definido para envolver seu avatar.</p>
                <div className="flex gap-2 flex-wrap mb-4">
                  {[
-                   { name: 'Ouro', file: '/frames/gold.svg' },
-                   { name: 'Diamante', file: '/frames/diamond.svg' },
-                   { name: 'Fogo', file: '/frames/fire.svg' },
-                   { name: 'Coroa', file: '/frames/crown.svg' },
-                   { name: 'Raio', file: '/frames/lightning.svg' },
-                   { name: 'Estrela', file: '/frames/star.svg' },
-                   { name: 'Dragão', file: '/frames/dragon.svg' }
+                   { name: 'Ouro', file: '/frames/gold.png' },
+                   { name: 'Diamante', file: '/frames/diamond.png' },
+                   { name: 'Fogo', file: '/frames/fire.png' },
+                   { name: 'Coroa', file: '/frames/crown.png' },
+                   { name: 'Raio', file: '/frames/lightning.png' },
+                   { name: 'Estrela', file: '/frames/star.png' },
+                   { name: 'Dragão', file: '/frames/dragon.png' }
                  ].map(frame => (
                    <Button 
                      key={frame.name} 

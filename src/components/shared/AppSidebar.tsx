@@ -93,11 +93,10 @@ export function AppSidebar() {
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-0.5">
-                  <p className="text-sm font-medium truncate">{profile.name}</p>
-                  <PlanBadge plan={profile.plan} className="scale-90 origin-left" />
+                <div>
+                  <p className={`font-semibold text-sm ${profile.isPremium ? 'text-primary' : ''} drop-shadow-sm`}>{profile.name}</p>
+                  <LevelBadge level={profile.level} className={profile.currentClass?.name || profile.className} size="sm" />
                 </div>
-                <LevelBadge level={profile.level} className={profile.className} size="sm" />
               </div>
             </div>
             <XPBar xp={profile.xp} level={profile.level} compact />

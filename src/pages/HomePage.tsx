@@ -53,17 +53,17 @@ export default function HomePage() {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
         <Card className="border-primary/20 glow-primary">
           <CardContent className="pt-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <LevelBadge level={profile.level} className={profile.className} size="md" />
-              {profile.specialization && (
-                <span className="text-sm text-muted-foreground">
-                  {profile.specialization === 'hercules' && '🏋️ Hércules'}
-                  {profile.specialization === 'hermes' && '🏃 Hermes'}
-                  {profile.specialization === 'apollo' && '🥗 Apollo'}
-                  {profile.specialization === 'athena' && '⚖️ Atena'}
-                </span>
-              )}
+            <div className="flex justify-center md:justify-start">
+              <LevelBadge level={profile.level} className={profile.currentClass?.name || profile.className} size="md" />
             </div>
+            {profile.specialization && (
+              <span className="text-sm text-muted-foreground block text-center md:text-left mt-2">
+                {profile.specialization === 'hercules' && '🏋️ Hércules'}
+                {profile.specialization === 'hermes' && '🏃 Hermes'}
+                {profile.specialization === 'apollo' && '🥗 Apollo'}
+                {profile.specialization === 'athena' && '⚖️ Atena'}
+              </span>
+            )}
             <XPBar xp={profile.xp} level={profile.level} />
             <div className="pt-4 border-t border-border/50 mt-4">
               <OverallRankBadge pm={profile.overall_mastery_points || 0} />

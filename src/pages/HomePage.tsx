@@ -11,6 +11,7 @@ import { OverallRankBadge } from '@/components/rpg/OverallRankBadge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { UpdatePopup } from '@/components/ui/UpdatePopup';
 
 export default function HomePage() {
   const { profile, user } = useAuth();
@@ -41,6 +42,7 @@ export default function HomePage() {
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
+      <UpdatePopup />
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-1">
         <h1 className="text-3xl font-display font-bold">
           Olá, {profile.name.split(' ')[0]}! <Swords className="inline h-7 w-7 text-primary" />

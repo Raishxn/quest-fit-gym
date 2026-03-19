@@ -66,7 +66,6 @@ export function ClassSelectorDialog({ onSelected }: { onSelected?: () => void })
       case 'Epic': return 'text-purple-400';
       case 'Legendary': return 'text-orange-400';
       case 'Unique': return 'text-red-500 font-bold';
-      case 'Unique': return 'text-red-500 font-bold';
       default: return 'text-slate-400';
     }
   };

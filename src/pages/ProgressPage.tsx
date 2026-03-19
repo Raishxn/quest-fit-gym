@@ -76,10 +76,10 @@ export default function ProgressPage() {
         .gte('started_at', dateRange.start)
         .lte('started_at', dateRange.end)
         .order('started_at', { ascending: true }),
-      supabase.from('body_measurements')
+      supabase.from('body_weight_logs')
         .select('*')
         .eq('user_id', user.id)
-        .order('measured_at', { ascending: true })
+        .order('date', { ascending: true })
         .limit(50),
       supabase.from('anamnesis')
         .select('*')

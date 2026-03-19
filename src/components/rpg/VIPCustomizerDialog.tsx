@@ -48,6 +48,12 @@ export function VIPCustomizerDialog() {
     toast.success('Moldura aplicada com majestade!');
   };
 
+  const setPredefinedFrame = async (url: string) => {
+    await supabase.from('profiles').update({ frame_url: url } as any).eq('user_id', user!.id);
+    await refreshProfile();
+    toast.success('Moldura pré-definida aplicada!');
+  };
+
   const removeFrame = async () => {
     await supabase.from('profiles').update({ frame_url: null } as any).eq('user_id', user!.id);
     await refreshProfile();
@@ -98,7 +104,31 @@ export function VIPCustomizerDialog() {
             </div>
 
             <div className="pt-2 border-t border-border">
-               <Label className="font-bold">Moldura Personalizada (Frame PNG/GIF)</Label>
+               <Label className="font-bold">Molduras Prontas VIP</Label>
+               <p className="text-xs text-muted-foreground mb-3">Escolha um estilo majestoso pré-definido para envolver seu avatar.</p>
+               <div className="flex gap-2 flex-wrap mb-4">
+                 {[
+                   { name: 'Ouro', file: '/frames/gold.svg' },
+                   { name: 'Diamante', file: '/frames/diamond.svg' },
+                   { name: 'Fogo', file: '/frames/fire.svg' },
+                   { name: 'Coroa', file: '/frames/crown.svg' },
+                   { name: 'Raio', file: '/frames/lightning.svg' },
+                   { name: 'Estrela', file: '/frames/star.svg' },
+                   { name: 'Dragão', file: '/frames/dragon.svg' }
+                 ].map(frame => (
+                   <Button 
+                     key={frame.name} 
+                     variant={profile?.frameUrl === frame.file ? 'default' : 'outline'}
+                     size="sm"
+                     onClick={() => setPredefinedFrame(frame.file)}
+                     className={profile?.frameUrl === frame.file ? 'bg-warning text-warning-foreground hover:bg-warning/80' : 'border-warning/30 hover:bg-warning/10 text-muted-foreground'}
+                   >
+                     {frame.name}
+                   </Button>
+                 ))}
+               </div>
+
+               <Label className="font-bold">Ou Envie uma Personalizada (Frame PNG/GIF)</Label>
                <p className="text-xs text-muted-foreground mb-3">Faça upload de uma borda vazada para sobrepor seu avatar.</p>
                <div className="flex gap-2">
                  <input ref={frameInput} type="file" accept="image/png, image/gif" className="hidden" onChange={e => e.target.files?.[0] && uploadFrame(e.target.files[0])} />

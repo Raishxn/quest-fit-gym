@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <linearGradient id="crown-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#B8860B" />
+      <stop offset="50%" stop-color="#FFD700" />
+      <stop offset="100%" stop-color="#DAA520" />
+    </linearGradient>
+  </defs>
+  <circle cx="50" cy="50" r="46" stroke="url(#crown-grad)" stroke-width="4" fill="none" />
+  <!-- Crown positioned elegantly at the top center -->
+  <path d="M35 15 L40 5 L50 12 L60 5 L65 15 L60 22 L40 22 Z" fill="url(#crown-grad)" />
+  <circle cx="40" cy="5" r="2" fill="#FF0000" />
+  <circle cx="50" cy="12" r="2" fill="#0000FF" />
+  <circle cx="60" cy="5" r="2" fill="#00FF00" />
+</svg>

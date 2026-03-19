@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import { MISSION_TEMPLATES } from './mission-templates-seed';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -20,6 +21,7 @@ export const fetchActiveMissions = async (userId: string) => {
 
   if (error) {
     console.error('Error fetching active missions:', error);
+    toast.error(`BD Erro (Fetch Missões): ${error.message}`);
     return [];
   }
   return data as unknown as ActiveMission[];
@@ -117,7 +119,10 @@ export const checkAndGenerateDailyMissions = async (userId: string) => {
           status: 'pending'
         }));
         const { error: insErr } = await supabase.from('active_missions').insert(newMissions);
-        if (insErr) console.error(`Erro inserindo missões ${t}:`, insErr);
+        if (insErr) {
+           console.error(`Erro inserindo missões ${t}:`, insErr);
+           toast.error(`BD Erro (Insert ${t}): ${insErr.message}`);
+        }
       }
     }
   }

@@ -66,7 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         name: data.name,
         avatarUrl: data.avatar_url || undefined,
         bannerUrl: data.banner_url || undefined,
-        frameUrl: data.frame_url || undefined,
+        frameUrl: data.avatar_frame && data.avatar_frame !== 'none' ? data.avatar_frame : undefined,
         isPremium: data.plan && data.plan !== 'free',
         avatarGlowColor: data.avatar_glow_color || undefined,
         nameColor: data.name_color || undefined,

@@ -1,4 +1,4 @@
-import { Home, Dumbbell, ListMusic, Salad, Activity, TrendingUp, Trophy, Users, User, Settings, Swords, Target, Shield, MessageSquare } from 'lucide-react';
+import { Home, Dumbbell, ListMusic, Salad, Activity, TrendingUp, Trophy, Users, User, Settings, Swords, Target, Shield, MessageSquare, Infinity as InfinityIcon } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -94,7 +94,19 @@ export function AppSidebar() {
               </div>
               <div className="flex-1 min-w-0">
                 <div>
-                  <p className={`font-semibold text-sm ${profile.isPremium ? 'text-primary' : ''} drop-shadow-sm`}>{profile.name}</p>
+                  <div className="flex items-center gap-1 flex-wrap">
+                    <p className={`font-semibold text-sm truncate ${profile.isPremium ? 'text-primary' : ''} drop-shadow-sm`}>
+                      {profile.name}
+                    </p>
+                    {profile.plan !== 'free' && (
+                       <PlanBadge plan={profile.plan} className="h-4 text-[8px] px-1 pb-0.5 scale-[0.85] origin-left" />
+                    )}
+                    {profile.is_owner && (
+                      <div className="flex items-center gap-0.5 text-[8px] font-bold text-white bg-black/50 px-1.5 py-0.5 rounded-full border border-primary/50 shadow-[0_0_10px_rgba(139,92,246,0.3)] scale-[0.85] origin-left">
+                        <InfinityIcon className="w-2 h-2 text-primary animate-pulse" /> DONO
+                      </div>
+                    )}
+                  </div>
                   <LevelBadge level={profile.level} className={profile.currentClass?.name || profile.className} size="sm" />
                 </div>
               </div>

@@ -43,13 +43,13 @@ export function VIPCustomizerDialog() {
     if (error) return toast.error('Erro no upload da moldura');
     
     const { data } = supabase.storage.from('avatars').getPublicUrl(path);
-    await supabase.from('profiles').update({ frame_url: data.publicUrl } as any).eq('user_id', user!.id);
+    await supabase.from('profiles').update({ avatar_frame: data.publicUrl } as any).eq('user_id', user!.id);
     await refreshProfile();
     toast.success('Moldura aplicada com majestade!');
   };
 
   const setPredefinedFrame = async (url: string) => {
-    await supabase.from('profiles').update({ frame_url: url } as any).eq('user_id', user!.id);
+    await supabase.from('profiles').update({ avatar_frame: url } as any).eq('user_id', user!.id);
     await refreshProfile();
     toast.success('Moldura pré-definida aplicada!');
   };

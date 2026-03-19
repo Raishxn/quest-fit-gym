@@ -48,6 +48,7 @@ export default function ProfilePage() {
   const [wallpaperUrl, setWallpaperUrl] = useState('');
   const [uploadingWallpaper, setUploadingWallpaper] = useState(false);
   const [showGifBannerCrop, setShowGifBannerCrop] = useState(false);
+  const [selectedTitleName, setSelectedTitleName] = useState('');
 
   useEffect(() => {
     if (!user) return;
@@ -61,6 +62,15 @@ export default function ProfilePage() {
       setWallpaperUrl(profile.profile_wallpaper_url || '');
     }
   }, [profile]);
+
+  useEffect(() => {
+    if (profile?.selected_title_id) {
+       supabase.from('titles' as any).select('name').eq('id', profile.selected_title_id).single()
+         .then(({ data }) => { if (data) setSelectedTitleName((data as unknown as {name: string}).name); });
+    } else {
+       setSelectedTitleName('');
+    }
+  }, [profile?.selected_title_id]);
 
   const loadProfileData = async () => {
     if (!user) return;
@@ -152,13 +162,13 @@ export default function ProfilePage() {
     toast.success('Efeito de nome salvo!');
   };
 
-  const saveFrame = async (frameId: string) => {
+  const saveFrame = async (frameUrl: string | null) => {
     if (!user) return;
-    const { error } = await supabase.from('profiles').update({ avatar_frame: frameId }).eq('user_id', user.id);
+    const { error } = await supabase.from('profiles').update({ avatar_frame: frameUrl || 'none' } as any).eq('user_id', user.id);
     if (error) { console.error('saveFrame error:', error); toast.error('Erro ao salvar moldura'); return; }
     await refreshProfile();
     setShowFrameSelector(false);
-    toast.success('Moldura atualizada!');
+    toast.success(frameUrl ? 'Moldura atualizada!' : 'Moldura removida.');
   };
 
   const saveProfileCustomization = async () => {
@@ -287,6 +297,7 @@ export default function ProfilePage() {
                     </div>
                   )}
                 </div>
+                {selectedTitleName && <p className="text-xs font-bold text-primary mt-1 border border-primary/20 bg-primary/10 inline-block px-2 py-0.5 rounded shadow-sm">{selectedTitleName}</p>}
                 {profile.bio && <p className="text-sm mt-1">{profile.bio}</p>}
                 <div className="mt-2">
                    <TitleSelector currentTitleId={profile.selected_title_id} onTitleChange={refreshProfile} />
@@ -301,16 +312,14 @@ export default function ProfilePage() {
               <div className="space-y-4">
               <div className="flex justify-between items-center mb-6">
                  <LevelBadge level={profile.level} className={profile.currentClass?.name || profile.className} />
-                 {profile.specialization && (
-                     <button
-                       className="h-7 w-7 rounded-full bg-secondary/80 hover:bg-secondary flex items-center justify-center border border-border transition-colors"
-                       onClick={() => setShowProfileCustomizer(true)}
-                       title="Personalizar perfil"
-                     >
-                       <Settings className="h-3.5 w-3.5 text-muted-foreground" />
-                     </button>
-                   )}
-                 </div>
+                 <button
+                   className="h-7 w-7 rounded-full bg-secondary/80 hover:bg-secondary flex items-center justify-center border border-border transition-colors"
+                   onClick={() => setShowProfileCustomizer(true)}
+                   title="Personalizar perfil"
+                 >
+                   <Settings className="h-3.5 w-3.5 text-muted-foreground" />
+                 </button>
+               </div>
                  {profile.currentClass && (
                    <div className="flex flex-col items-end">
                       <span className="text-[10px] font-bold uppercase text-muted-foreground">{profile.currentClass.rarity}</span>
@@ -645,23 +654,24 @@ export default function ProfilePage() {
           </DialogHeader>
           <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
             {[
-              { id: 'none', label: 'Nenhuma', preview: null, vipOnly: false },
-              { id: 'gold_circle', label: 'Ouro', preview: '🟡', vipOnly: false },
-              { id: 'diamond', label: 'Diamante', preview: '💎', vipOnly: true },
-              { id: 'fire', label: 'Fogo', preview: '🔥', vipOnly: true },
-              { id: 'crown', label: 'Coroa', preview: '👑', vipOnly: true },
-              { id: 'lightning', label: 'Raio', preview: '⚡', vipOnly: true },
-              { id: 'stars', label: 'Estrelas', preview: '⭐', vipOnly: true },
-              { id: 'dragon', label: 'Dragão', preview: '🐉', vipOnly: true },
+              { id: 'none', label: 'Nenhuma', preview: null, file: null, vipOnly: false },
+              { id: 'gold', label: 'Ouro', preview: '🟡', file: '/frames/gold.png', vipOnly: false },
+              { id: 'diamond', label: 'Diamante', preview: '💎', file: '/frames/diamond.png', vipOnly: true },
+              { id: 'fire', label: 'Fogo', preview: '🔥', file: '/frames/fire.png', vipOnly: true },
+              { id: 'crown', label: 'Coroa', preview: '👑', file: '/frames/crown.png', vipOnly: true },
+              { id: 'lightning', label: 'Raio', preview: '⚡', file: '/frames/lightning.png', vipOnly: true },
+              { id: 'star', label: 'Estrelas', preview: '⭐', file: '/frames/star.png', vipOnly: true },
+              { id: 'dragon', label: 'Dragão', preview: '🐉', file: '/frames/dragon.png', vipOnly: true },
             ].map(frame => {
               const locked = frame.vipOnly && !profile.isPremium;
+              const isActive = frame.id === 'none' ? !profile.frameUrl : profile.frameUrl === frame.file;
               return (
                 <button
                   key={frame.id}
                   className={`p-3 rounded-xl text-center border-2 transition-all ${
-                    profile.avatar_frame === frame.id ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'
+                    isActive ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'
                   } ${locked ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
-                  onClick={() => !locked && saveFrame(frame.id)}
+                  onClick={() => !locked && saveFrame(frame.file)}
                   disabled={locked}
                 >
                   <span className="text-2xl">{frame.preview || '❌'}</span>

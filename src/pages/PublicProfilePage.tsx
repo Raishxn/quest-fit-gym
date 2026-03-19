@@ -27,6 +27,7 @@ export default function PublicProfilePage() {
   const [friendshipId, setFriendshipId] = useState<string | null>(null);
   const [pendingRequest, setPendingRequest] = useState(false);
   const [currentClass, setCurrentClass] = useState<any>(null);
+  const [selectedTitleName, setSelectedTitleName] = useState('');
 
   // Redirect to own profile
   useEffect(() => {
@@ -60,6 +61,12 @@ export default function PublicProfilePage() {
     }
 
     setP(profileRes.data);
+
+    const titleId = (profileRes.data as any).selected_title_id;
+    if (titleId) {
+       const titleRes = await supabase.from('titles' as any).select('name').eq('id', titleId).single();
+       if (titleRes.data) setSelectedTitleName((titleRes.data as unknown as {name: string}).name);
+    }
 
     const workouts = workoutsRes.data || [];
     const cardio = cardioRes.data || [];
@@ -168,6 +175,9 @@ export default function PublicProfilePage() {
                     ? <img src={p.avatar_url} alt="" className="w-full h-full object-cover" />
                     : p.name?.charAt(0)}
                 </div>
+                {p.avatar_frame && p.avatar_frame !== 'none' && (
+                  <img src={p.avatar_frame} alt="Frame" className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] object-contain pointer-events-none z-10 scale-110 drop-shadow-lg" />
+                )}
               </div>
             </div>
           </div>
@@ -192,6 +202,7 @@ export default function PublicProfilePage() {
                     </div>
                   )}
                 </div>
+                {selectedTitleName && <p className="text-xs font-bold text-primary mt-1 border border-primary/20 bg-primary/10 inline-block px-2 py-0.5 rounded shadow-sm">{selectedTitleName}</p>}
                 {p.bio && <p className="text-sm mt-1">{p.bio}</p>}
               </div>
               <div className="flex flex-col items-end gap-2">

@@ -11,6 +11,11 @@ export interface UserProfile {
   name: string;
   avatarUrl?: string;
   bannerUrl?: string;
+  frameUrl?: string;
+  isPremium?: boolean;
+  avatarGlowColor?: string;
+  nameColor?: string;
+  profileFont?: string;
   bio?: string;
   theme: ThemeId;
   xp: number;
@@ -97,6 +102,10 @@ export interface RankingEntry {
   className: ClassName;
   xp: number;
   avatarUrl?: string;
+  frameUrl?: string;
+  isPremium?: boolean;
+  avatarGlowColor?: string;
+  nameColor?: string;
 }
 
 export interface FeedActivity {

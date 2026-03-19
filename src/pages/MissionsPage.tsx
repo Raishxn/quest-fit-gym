@@ -5,8 +5,40 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { fetchActiveMissions, fetchGlobalMissions, claimMissionReward, checkAndGenerateDailyMissions, ActiveMission, GlobalMission } from '@/lib/missions';
-import { Medal, CheckCircle2, Gift, Loader2 } from 'lucide-react';
+import { Medal, CheckCircle2, Gift, Loader2, Clock } from 'lucide-react';
 import { toast } from 'sonner';
+
+/** Calcula as datas de reset */
+const getNextDailyReset = () => { const d = new Date(); d.setHours(23, 59, 59, 999); return d; }
+const getNextWeeklyReset = () => { 
+  const d = new Date(); 
+  const day = d.getDay(); 
+  const daysUntilSunday = day === 0 ? 0 : 7 - day; 
+  d.setDate(d.getDate() + daysUntilSunday); 
+  d.setHours(23, 59, 59, 999); 
+  return d; 
+}
+const getNextMonthlyReset = () => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59, 999); }
+
+function MissionCountdown({ targetDate }: { targetDate: Date }) {
+  const [timeLeft, setTimeLeft] = useState('');
+  useEffect(() => {
+    const calc = () => {
+      const diff = targetDate.getTime() - new Date().getTime();
+      if (diff <= 0) return setTimeLeft('00h 00m');
+      const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const m = Math.floor((diff / 1000 / 60) % 60);
+      if (d > 0) setTimeLeft(`${d}d ${h}h`);
+      else setTimeLeft(`${h}h ${m}m`);
+    };
+    calc();
+    const interval = setInterval(calc, 60000);
+    return () => clearInterval(interval);
+  }, [targetDate]);
+
+  return <span className="text-xs font-mono font-bold bg-secondary/80 text-muted-foreground px-3 py-1 rounded-full flex items-center justify-center gap-1.5 ring-1 ring-border shadow-inner"><Clock className="w-3.5 h-3.5" /> Atualiza em {timeLeft}</span>;
+}
 
 export default function MissionsPage() {
   const { user } = useAuth();
@@ -132,6 +164,9 @@ export default function MissionsPage() {
         </TabsList>
         
         <TabsContent value="daily" className="mt-6 space-y-4 outline-none">
+          <div className="flex justify-end mb-2">
+             <MissionCountdown targetDate={getNextDailyReset()} />
+          </div>
           {dailyMissions.length === 0 ? (
              <p className="text-muted-foreground text-center py-12 bg-card rounded-xl border border-border outline-dashed outline-1 outline-neutral-800 outline-offset-[-8px]">Nenhuma missão diária ativa hoje.</p>
           ) : (
@@ -140,6 +175,9 @@ export default function MissionsPage() {
         </TabsContent>
         
         <TabsContent value="weekly" className="mt-6 space-y-4 outline-none">
+          <div className="flex justify-end mb-2">
+             <MissionCountdown targetDate={getNextWeeklyReset()} />
+          </div>
           {weeklyMissions.length === 0 ? (
              <p className="text-muted-foreground text-center py-12 bg-card rounded-xl border border-border outline-dashed outline-1 outline-neutral-800 outline-offset-[-8px]">Você completou todas missões semanais.</p>
           ) : (
@@ -148,6 +186,9 @@ export default function MissionsPage() {
         </TabsContent>
         
         <TabsContent value="monthly" className="mt-6 space-y-4 outline-none">
+          <div className="flex justify-end mb-2">
+             <MissionCountdown targetDate={getNextMonthlyReset()} />
+          </div>
           {monthlyMissions.length === 0 ? (
              <p className="text-muted-foreground text-center py-12 bg-card rounded-xl border border-border outline-dashed outline-1 outline-neutral-800 outline-offset-[-8px]">Sem missões mensais no momento.</p>
           ) : (

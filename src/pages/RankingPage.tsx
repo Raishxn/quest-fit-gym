@@ -53,11 +53,11 @@ export default function RankingPage() {
     } else if (mainTab === 'exercises') {
       if (!selectedExerciseId) { setLoading(false); return; }
       query = supabase.from('exercise_ranks')
-        .select('user_id, best_weight_kg, best_reps, profiles!inner(username, name, avatar_url, level, class_name)')
+        .select('user_id, best_weight_kg, best_reps, profiles!inner(username, name, avatar_url, level, class_name, is_premium, avatar_glow_color, name_color, frame_url)')
         .eq('exercise_id', selectedExerciseId)
         .order('best_weight_kg', { ascending: false });
     } else {
-      query = supabase.from('profiles').select('user_id, username, name, xp, level, class_name, avatar_url, overall_mastery_points, overall_rank, streak');
+      query = supabase.from('profiles').select('user_id, username, name, xp, level, class_name, avatar_url, overall_mastery_points, overall_rank, streak, is_premium, avatar_glow_color, name_color, frame_url');
       
       if (mainTab === 'level') query = query.order('level', { ascending: false }).order('xp', { ascending: false });
       if (mainTab === 'overall') query = query.order('overall_mastery_points', { ascending: false });
@@ -101,6 +101,10 @@ export default function RankingPage() {
         class_name: r.profiles?.class_name,
         best_weight_kg: r.best_weight_kg,
         best_reps: r.best_reps,
+        is_premium: r.profiles?.is_premium,
+        avatar_glow_color: r.profiles?.avatar_glow_color,
+        name_color: r.profiles?.name_color,
+        frame_url: r.profiles?.frame_url,
       }));
       setData(formatted);
     } else {

@@ -83,8 +83,12 @@ export function AppSidebar() {
         {profile && !collapsed && (
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">
-                {profile.name.charAt(0)}
+              <div className="h-8 w-8 shrink-0 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary border border-primary/20 overflow-hidden relative">
+                {profile.avatarUrl ? (
+                  <img src={profile.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                ) : (
+                  profile.name.charAt(0)
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{profile.name}</p>
@@ -96,8 +100,12 @@ export function AppSidebar() {
         )}
         {profile && collapsed && (
           <div className="flex justify-center">
-            <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">
-              {profile.name.charAt(0)}
+            <div className="h-8 w-8 shrink-0 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary border border-primary/20 overflow-hidden relative">
+              {profile.avatarUrl ? (
+                <img src={profile.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+              ) : (
+                profile.name.charAt(0)
+              )}
             </div>
           </div>
         )}

@@ -106,11 +106,14 @@ export const checkAndGenerateDailyMissions = async (userId: string) => {
       const { data: templates } = await supabase
         .from('mission_templates')
         .select('*')
-        .eq('type', t)
-        .limit(limit);
+        .eq('type', t);
 
       if (templates && templates.length > 0) {
-        const newMissions = templates.map(temp => ({
+        // Embaralhando as templates para virem sempre novas missões diferentes
+        const shuffled = templates.sort(() => 0.5 - Math.random());
+        const selected = shuffled.slice(0, limit);
+
+        const newMissions = selected.map(temp => ({
           user_id: userId,
           template_id: temp.id,
           type: t,

@@ -13,6 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import { ClassSelectorDialog } from '@/components/rpg/ClassSelectorDialog';
+import { VIPCustomizerDialog } from '@/components/rpg/VIPCustomizerDialog';
 
 export default function ProfilePage() {
   const { profile, user, refreshProfile } = useAuth();
@@ -92,9 +93,15 @@ export default function ProfilePage() {
             <input ref={bannerInput} type="file" accept="image/*" className="hidden" onChange={e => e.target.files?.[0] && uploadImage(e.target.files[0], 'banners')} />
             <div className="absolute -bottom-8 left-6">
               <div className="relative group/avatar cursor-pointer" onClick={e => { e.stopPropagation(); avatarInput.current?.click(); }}>
-                <div className="h-20 w-20 rounded-full bg-card border-4 border-card flex items-center justify-center text-3xl font-bold text-primary glow-primary overflow-hidden">
+                <div 
+                  className="h-20 w-20 rounded-full bg-card border-4 border-card flex items-center justify-center text-3xl font-bold text-primary overflow-hidden relative"
+                  style={profile.isPremium && profile.avatarGlowColor ? { boxShadow: `0 0 30px ${profile.avatarGlowColor}, inset 0 0 15px ${profile.avatarGlowColor}`, borderColor: profile.avatarGlowColor } : {}}
+                >
                   {profile.avatarUrl ? <img src={profile.avatarUrl} alt="" className="w-full h-full object-cover" /> : profile.name.charAt(0)}
                 </div>
+                {profile.frameUrl && (
+                  <img src={profile.frameUrl} alt="Frame" className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] object-contain pointer-events-none z-10 scale-110 drop-shadow-lg" />
+                )}
                 <div className="absolute inset-0 rounded-full bg-black/0 group-hover/avatar:bg-black/30 transition-colors flex items-center justify-center">
                   <Camera className="h-4 w-4 text-white opacity-0 group-hover/avatar:opacity-100 transition-opacity" />
                 </div>
@@ -105,7 +112,7 @@ export default function ProfilePage() {
           <CardContent className="pt-12 pb-4 space-y-3">
             <div className="flex items-start justify-between">
               <div>
-                <h1 className="text-2xl font-display font-bold">{profile.name}</h1>
+                <h1 className="text-2xl font-display font-bold" style={profile.isPremium && profile.nameColor ? { color: profile.nameColor, textShadow: `0 0 10px ${profile.nameColor}` } : {}}>{profile.name}</h1>
                 <p className="text-sm text-muted-foreground">@{profile.username}</p>
                 {profile.bio && <p className="text-sm mt-1">{profile.bio}</p>}
                 <div className="mt-2">
@@ -190,7 +197,8 @@ export default function ProfilePage() {
         </Card>
       </motion.div>
 
-      <div className="flex justify-center">
+      <div className="flex justify-center gap-3 pb-6">
+        <VIPCustomizerDialog />
         <Button variant="outline" asChild>
           <Link to="/friends" className="font-display">
             <Users className="h-4 w-4 mr-2" /> Ver Amigos

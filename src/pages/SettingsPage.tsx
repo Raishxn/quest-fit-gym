@@ -1,17 +1,66 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Settings, User, Palette, Dumbbell, Bell, Shield, CreditCard, Info } from 'lucide-react';
+import { Settings, User, Palette, Dumbbell, Bell, Shield, CreditCard, Info, Copy, Check, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
 import { ThemeSwitcher } from '@/components/shared/ThemeSwitcher';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 export default function SettingsPage() {
   const { profile } = useAuth();
+  const [giftCodes, setGiftCodes] = useState<any[]>([]);
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const [loadingPortal, setLoadingPortal] = useState(false);
+
+  useEffect(() => {
+    if (profile) {
+      fetchGiftCodes();
+    }
+  }, [profile]);
+
+  const fetchGiftCodes = async () => {
+    const { data } = await supabase
+      .from('gift_codes')
+      .select('*')
+      .eq('creator_user_id', profile?.id)
+      .order('created_at', { ascending: false });
+    
+    if (data) setGiftCodes(data);
+  };
+
+  const copyToClipboard = (code: string) => {
+    navigator.clipboard.writeText(code);
+    setCopiedCode(code);
+    toast.success('Código copiado para a área de transferência!');
+    setTimeout(() => setCopiedCode(null), 2000);
+  };
+
+  const handleManageSubscription = async () => {
+    try {
+      setLoadingPortal(true);
+      const { data, error } = await supabase.functions.invoke('create-portal-session', {
+        body: { userId: profile?.id }
+      });
+      if (error) throw error;
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (err: any) {
+      console.error(err);
+      toast.error('Não foi possível acessar o portal de assinaturas.');
+    } finally {
+      setLoadingPortal(false);
+    }
+  };
+
   if (!profile) return null;
 
   return (
@@ -106,18 +155,96 @@ export default function SettingsPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="plan">
+        <TabsContent value="plan" className="space-y-6">
           <Card>
-            <CardHeader><CardTitle className="font-display">Plano Atual</CardTitle></CardHeader>
-            <CardContent className="space-y-4">
+            <CardHeader>
+              <CardTitle className="font-display flex items-center justify-between">
+                <span>Plano Atual</span>
+                {profile.plan !== 'free' && (
+                  <Badge variant="default" className="bg-primary hover:bg-primary uppercase">{profile.plan.replace('_', '+')}</Badge>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
               <div className="p-4 rounded-lg bg-secondary/50 border border-border">
-                <p className="font-display font-bold text-lg">🪨 Free</p>
-                <p className="text-sm text-muted-foreground">2 programas • 10 exercícios custom • histórico 30d</p>
+                {profile.plan === 'free' ? (
+                  <>
+                    <p className="font-display font-bold text-lg">🪨 Free</p>
+                    <p className="text-sm text-muted-foreground">Plano Básico. Funcionalidades limitadas.</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="font-display font-bold text-lg capitalize">👑 {profile.plan.replace('_', '+')}</p>
+                    <p className="text-sm text-muted-foreground">Acesso premium liberado. Você está no topo!</p>
+                  </>
+                )}
               </div>
-              <Button className="font-display w-full" asChild><a href="/upgrade">⚔️ Fazer Upgrade</a></Button>
+              
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button className="font-display flex-1" asChild>
+                  <Link to="/upgrade">⚔️ Explorar Planos</Link>
+                </Button>
+                {profile.plan !== 'free' && (
+                  <Button variant="outline" className="font-display flex-1" onClick={handleManageSubscription} disabled={loadingPortal}>
+                    {loadingPortal ? "Carregando..." : <><ExternalLink className="w-4 h-4 mr-2" /> Gerenciar Assinatura</>}
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-display flex items-center gap-2">
+                🎁 Meus Códigos de Presente
+              </CardTitle>
+              <CardDescription>
+                Códigos gerados pelas suas compras semestrais ou anuais. Envie para seus amigos!
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {giftCodes.length === 0 ? (
+                <div className="text-center py-6 text-muted-foreground text-sm border border-dashed rounded-lg bg-secondary/20">
+                  Você ainda não gerou nenhum código de presente.<br/>
+                  Faça upgrade para um plano Semestral ou Anual para presentear amigos!
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {giftCodes.map((gift) => {
+                    const isRedeemed = gift.status !== 'active';
+                    return (
+                      <div key={gift.id} className={`p-4 rounded-lg border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 ${isRedeemed ? 'bg-secondary/20 opcaity-80' : 'bg-secondary/50 border-primary/20'}`}>
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-mono font-bold tracking-wider">{gift.code}</span>
+                            <Badge variant={isRedeemed ? "outline" : "default"}>{isRedeemed ? 'Resgatado' : 'Disponível'}</Badge>
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            Concede {gift.months_granted} {gift.months_granted > 1 ? 'meses' : 'mês'} de <span className="uppercase font-bold text-primary">{gift.plan_granted.replace('_', '+')}</span>
+                          </p>
+                          <p className="text-[10px] text-muted-foreground mt-1">
+                            Validade: {new Date(gift.expires_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <Button 
+                          variant={isRedeemed ? 'outline' : 'secondary'} 
+                          size="sm"
+                          disabled={isRedeemed}
+                          onClick={() => copyToClipboard(gift.code)}
+                          className="shrink-0 w-full sm:w-auto"
+                        >
+                          {copiedCode === gift.code ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
+                          {copiedCode === gift.code ? 'Copiado' : 'Copiar Código'}
+                        </Button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
+
         <TabsContent value="about">
           <Card>
             <CardHeader><CardTitle className="font-display">Quest Fit</CardTitle></CardHeader>

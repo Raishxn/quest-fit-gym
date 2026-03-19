@@ -1,73 +1,235 @@
-# Welcome to your Lovable project
+<p align="center">
+  <h1 align="center">⚔️ Quest Fit Gym</h1>
+  <p align="center"><strong>Level up your body. Conquer your limits.</strong></p>
+  <p align="center">
+    Aplicação web gamificada de acompanhamento fitness que transforma treinos em uma jornada RPG.<br/>
+    Open-source • Gratuito • Feito com ❤️ pela comunidade
+  </p>
+</p>
 
-## Project info
+---
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## 📸 Visão Geral
 
-## How can I edit this code?
+Quest Fit Gym combina o tracking rigoroso de treinos e dieta com mecânicas de RPG para tornar a rotina na academia viciante. Cada sessão gera XP, cada exercício tem um rank de Ferro a Transcendente, e cada dia de streak te mantém motivado.
 
-There are several ways of editing your application.
+## ✨ Features
 
-**Use Lovable**
+### 🏋️ Treino
+- **Sessão de treino ativa** com timer em tempo real
+- Adicione exercícios de uma **base de dados com 100+ exercícios**
+- Registro de séries com tipos: **Warmup, Working, Backoff**
+- Cálculo automático de **backoff sets** (75% da última working)
+- **Ranks por exercício**: Ferro → Bronze → Prata → Ouro → Platina → Diamante → Mestre → Grão-Mestre → Lendário → Transcendente
+- **Personal Records** tracking
+- Suporte a treino **Solo** ou em **Party** com amigos
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+### 🎵 Playlists de Treino
+- Crie **programas de treino** completos (Push Pull Legs, Upper Lower, etc.)
+- Organize por **dias com exercícios planejados**
+- Configure séries, reps e tempo de descanso padrão
+- Arquive e restaure playlists antigas
 
-Changes made via Lovable will be committed automatically to this repo.
+### 🥗 Dieta & Nutrição
+- 7 categorias de refeição (Café da Manhã → Ceia)
+- **Busca inteligente de alimentos** com macros por 100g
+- **Cadastro de alimentos personalizados**
+- Ring chart de progresso: Calorias, Proteína, Gordura, Carboidratos
+- Tracking de **consumo de água** diário
+- **Metas automáticas** calculadas pela Anamnese (BMR/TDEE)
 
-**Use your preferred IDE**
+### 🏃 Cardio
+- 8 tipos de cardio: Corrida, Bike, Natação, Caminhada, Elíptico, Remo, Pular Corda, Outro
+- Registro de duração, distância e calorias
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### 📊 Progresso
+- **Progressão por exercício** com comparação de cargas
+- **Séries por grupo muscular** com visualização em barras
+- **Histórico de peso corporal** com variação
+- **Gasto calórico** (TDEE + treino + cardio)
+- **Relatório Semanal** automático aos sábados
+- Filtros: Semanal, Mensal, Período Personalizado
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### ⚔️ Sistema RPG
+- **XP & Nível**: Iniciante → Aprendiz → Guerreiro → Veterano → Elite → Lendário → Imortal
+- **Atributos**: STR (Força), END (Resistência), VIT (Vitalidade), AGI (Agilidade)
+- **Classes RPG** com 8 arquétipos e sistema de raridade
+- **Ranking Geral (Overall Mastery)**: Ferro IV → Transcendente I com Pontos de Maestria
+- **Conquistas** com ícones e recompensas de XP
 
-Follow these steps:
+### 🎯 Missões
+- **Missões Diárias** com reset automático
+- **Missões Semanais** e **Mensais**
+- **Missões Master** desbloqueadas por rank
+- **Missões Globais** da comunidade com progresso coletivo
+- Countdown de reset em tempo real
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### 🏰 Social
+- **Amigos**: Buscar, enviar solicitações, aceitar/recusar
+- **Guildas**: Criar, buscar, entrar, sair com dashboard e membros
+- **Party**: Lobby para treinar com amigos em sessão conjunta
+- **Ranking Hall da Fama**: 5 categorias × 3 escopos (Global, Regional, Amigos)
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### 👑 VIP / Cosméticos
+- **Aura Glow** no avatar com cor personalizada
+- **Cor metálica do nome**
+- **Moldura (Frame)** personalizada PNG/GIF
+- **Avatar/Banner GIF** animado
+- Planos: Free, VIP, VIP+, PRO *(100% cosmético, sem P2W)*
 
-# Step 3: Install the necessary dependencies.
-npm i
+### ⚙️ Configurações
+- **6 temas** (dark/light × red/orange/gold)
+- **7 abas**: Conta, Aparência, Treino, Notificações, Privacidade, Plano, Sobre
+- Controle de **visibilidade do perfil** (Público, Só Amigos, Privado)
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+---
+
+## 🛠️ Tech Stack
+
+| Camada | Tecnologia |
+|--------|-----------|
+| **Frontend** | React 18, TypeScript, Vite |
+| **Styling** | Tailwind CSS 3, shadcn/ui (Radix UI), CSS Variables |
+| **Animações** | Framer Motion |
+| **Estado** | Zustand (global), TanStack React Query (server state) |
+| **Formulários** | React Hook Form + Zod |
+| **Roteamento** | React Router DOM v6 |
+| **Gráficos** | Recharts |
+| **Backend** | Supabase (PostgreSQL, Auth, Storage, RLS) |
+| **Ícones** | Lucide React |
+| **Notificações** | Sonner (toasts) |
+| **Testes** | Vitest + React Testing Library + Playwright (E2E) |
+
+---
+
+## 🚀 Instalação
+
+```bash
+# Clone o repositório
+git clone https://github.com/Raishxn/quest-fit-gym.git
+cd quest-fit-gym
+
+# Instale as dependências
+npm install
+
+# Configure variáveis de ambiente
+cp .env.example .env
+# Preencha VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY
+
+# Rode em desenvolvimento
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Acesse `http://localhost:5173`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+---
 
-**Use GitHub Codespaces**
+## 🗄️ Banco de Dados (Supabase)
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Tabelas Principais
+| Tabela | Descrição |
+|--------|-----------|
+| `profiles` | Perfil RPG do usuário (XP, nível, atributos, plano) |
+| `anamnesis` | Dados físicos + metas calculadas |
+| `exercises` | Base de exercícios (100+ seed) |
+| `workout_programs` | Playlists de treino |
+| `workout_days` | Dias dentro de um programa |
+| `planned_exercises` | Exercícios planejados em um dia |
+| `workout_sessions` | Sessões de treino ativas/completadas |
+| `exercise_logs` | Exercícios realizados numa sessão |
+| `set_logs` | Séries individuais (peso, reps, tipo) |
+| `exercise_ranks` | Rank por exercício (Ferro → Transcendente) |
+| `personal_records` | PRs por exercício |
+| `foods` | Base de alimentos com macros |
+| `diet_days` | Registro diário de dieta |
+| `meals` / `meal_items` | Refeições e itens |
+| `cardio_sessions` | Sessões de cardio |
+| `friendships` | Sistema de amizades |
+| `guilds` / `guild_members` | Sistema de guildas |
+| `achievements` / `user_achievements` | Conquistas |
+| `xp_transactions` | Log de XP |
+| `feed_activities` / `feed_reactions` | Feed social |
+| `notifications` | Notificações |
+| `classes` | Classes RPG com buffs |
+| `mission_templates` / `user_missions` / `global_missions` | Sistema de missões |
+| `body_measurements` | Histórico de peso corporal |
 
-## What technologies are used for this project?
+---
 
-This project is built with:
+## 📋 Roadmap
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### ✅ v1.0.0 Alpha — Core Features
+Todas as features de treino, dieta, cardio, RPG, social e missões.
 
-## How can I deploy this project?
+### 🔥 v1.0.1 — Hotfix (Em Andamento)
+- [ ] Corrigir seleção de classe RPG (criar tabelas no banco)
+- [ ] Preview e crop de avatar/banner antes do upload
+- [ ] Settings salvarem na DB
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+### 📦 v1.1 — Polish
+- [ ] Notificações inbox
+- [ ] Feed formatado (Quest Log)
+- [ ] Tutorial/Onboarding
+- [ ] Acessibilidade
 
-## Can I connect a custom domain to my Lovable project?
+### 📦 v1.2 — Social+
+- [ ] Chat na Party (realtime)
+- [ ] Timeline de amigos
+- [ ] Perfil público
+- [ ] Menções @username
 
-Yes, you can!
+### 🏪 v1.3 — Quest Store
+- [ ] Loja de cosméticos
+- [ ] Battle Pass mensal
+- [ ] Moeda virtual (Ouro)
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### 💳 v1.4 — Monetização Real
+- [ ] Integração Stripe/MercadoPago
+- [ ] VIP real com verificação RLS
+- [ ] Admin dashboard
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+### 📱 v2.0 — Mobile & PWA
+- [ ] Progressive Web App
+- [ ] Push notifications
+- [ ] Integração wearables
+- [ ] QR code check-in
+
+### 🌎 v3.0 — Comunidade
+- [ ] Fórum / discussões
+- [ ] Ranking estadual real
+- [ ] Eventos sazonais
+- [ ] Compartilhamento de playlists
+
+---
+
+## 🤝 Contribuindo
+
+Quest Fit Gym é **open-source** e aceita contribuições! Veja nosso guia:
+
+1. Fork o projeto
+2. Crie sua branch (`git checkout -b feature/minha-feature`)
+3. Commit suas mudanças (`git commit -m 'feat: minha feature'`)
+4. Push para a branch (`git push origin feature/minha-feature`)
+5. Abra um Pull Request
+
+---
+
+## 📄 Licença
+
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+
+---
+
+## 💖 Apoie o Projeto
+
+Se Quest Fit Gym te ajuda na academia, considere apoiar:
+
+- ⭐ Dê uma estrela no GitHub
+- 🗣️ Compartilhe com amigos que treinam
+- 💰 Considere um plano VIP quando disponível (R$5,99+)
+
+---
+
+<p align="center">
+  <strong>⚔️ Level up your body. Conquer your limits. ⚔️</strong>
+</p>

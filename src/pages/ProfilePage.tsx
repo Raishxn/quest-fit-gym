@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { User, Dumbbell, Activity, Calendar, TrendingUp, Camera, Users } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import { ClassSelectorDialog } from '@/components/rpg/ClassSelectorDialog';
 import { VIPCustomizerDialog } from '@/components/rpg/VIPCustomizerDialog';
+import ImageCropDialog from '@/components/shared/ImageCropDialog';
 
 export default function ProfilePage() {
   const { profile, user, refreshProfile } = useAuth();
@@ -21,8 +22,8 @@ export default function ProfilePage() {
   const [userAchievements, setUserAchievements] = useState<any[]>([]);
   const [stats, setStats] = useState({ totalWorkouts: 0, totalVolume: 0, totalCardioHours: 0 });
   const [friends, setFriends] = useState<any[]>([]);
-  const avatarInput = useRef<HTMLInputElement>(null);
-  const bannerInput = useRef<HTMLInputElement>(null);
+  const [showAvatarCrop, setShowAvatarCrop] = useState(false);
+  const [showBannerCrop, setShowBannerCrop] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -55,12 +56,14 @@ export default function ProfilePage() {
     setFriends(friendsRes.data || []);
   };
 
-  const uploadImage = async (file: File, bucket: 'avatars' | 'banners') => {
+  const uploadCroppedImage = async (blob: Blob, bucket: 'avatars' | 'banners') => {
     if (!user) return;
-    const ext = file.name.split('.').pop();
-    const path = `${user.id}/${Date.now()}.${ext}`;
+    const path = `${user.id}/${Date.now()}.webp`;
 
-    const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: true });
+    const { error } = await supabase.storage.from(bucket).upload(path, blob, {
+      upsert: true,
+      contentType: 'image/webp',
+    });
     if (error) { toast.error('Erro ao enviar imagem'); return; }
 
     const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(path);
@@ -85,14 +88,13 @@ export default function ProfilePage() {
     <div className="space-y-6 max-w-3xl mx-auto">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
         <Card className="overflow-hidden">
-          <div className="h-32 bg-gradient-rpg relative group cursor-pointer" onClick={() => bannerInput.current?.click()}>
+          <div className="h-32 bg-gradient-rpg relative group cursor-pointer" onClick={() => setShowBannerCrop(true)}>
             {profile.bannerUrl && <img src={profile.bannerUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />}
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
               <Camera className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
-            <input ref={bannerInput} type="file" accept="image/*" className="hidden" onChange={e => e.target.files?.[0] && uploadImage(e.target.files[0], 'banners')} />
             <div className="absolute -bottom-8 left-6">
-              <div className="relative group/avatar cursor-pointer" onClick={e => { e.stopPropagation(); avatarInput.current?.click(); }}>
+              <div className="relative group/avatar cursor-pointer" onClick={e => { e.stopPropagation(); setShowAvatarCrop(true); }}>
                 <div 
                   className="h-20 w-20 rounded-full bg-card border-4 border-card flex items-center justify-center text-3xl font-bold text-primary overflow-hidden relative"
                   style={profile.isPremium && profile.avatarGlowColor ? { boxShadow: `0 0 30px ${profile.avatarGlowColor}, inset 0 0 15px ${profile.avatarGlowColor}`, borderColor: profile.avatarGlowColor } : {}}
@@ -105,7 +107,6 @@ export default function ProfilePage() {
                 <div className="absolute inset-0 rounded-full bg-black/0 group-hover/avatar:bg-black/30 transition-colors flex items-center justify-center">
                   <Camera className="h-4 w-4 text-white opacity-0 group-hover/avatar:opacity-100 transition-opacity" />
                 </div>
-                <input ref={avatarInput} type="file" accept="image/*" className="hidden" onChange={e => e.target.files?.[0] && uploadImage(e.target.files[0], 'avatars')} />
               </div>
             </div>
           </div>
@@ -205,6 +206,28 @@ export default function ProfilePage() {
           </Link>
         </Button>
       </div>
+
+      {/* Avatar Crop Dialog */}
+      <ImageCropDialog
+        open={showAvatarCrop}
+        onOpenChange={setShowAvatarCrop}
+        onCropComplete={(blob) => uploadCroppedImage(blob, 'avatars')}
+        aspectRatio={1}
+        shape="circle"
+        title="Ajustar Foto de Perfil"
+        outputWidth={400}
+      />
+
+      {/* Banner Crop Dialog */}
+      <ImageCropDialog
+        open={showBannerCrop}
+        onOpenChange={setShowBannerCrop}
+        onCropComplete={(blob) => uploadCroppedImage(blob, 'banners')}
+        aspectRatio={3}
+        shape="rect"
+        title="Ajustar Banner"
+        outputWidth={900}
+      />
     </div>
   );
 }

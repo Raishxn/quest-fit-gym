@@ -322,6 +322,51 @@ export type Database = {
         }
         Relationships: []
       }
+      classes: {
+        Row: {
+          archetype: string
+          bonus_type: string
+          bonus_value: number
+          created_at: string
+          debuff_type: string | null
+          debuff_value: number | null
+          description: string | null
+          icon_emoji: string
+          id: string
+          name: string
+          rarity: string
+          unlock_requirement: string | null
+        }
+        Insert: {
+          archetype: string
+          bonus_type: string
+          bonus_value?: number
+          created_at?: string
+          debuff_type?: string | null
+          debuff_value?: number | null
+          description?: string | null
+          icon_emoji?: string
+          id?: string
+          name: string
+          rarity?: string
+          unlock_requirement?: string | null
+        }
+        Update: {
+          archetype?: string
+          bonus_type?: string
+          bonus_value?: number
+          created_at?: string
+          debuff_type?: string | null
+          debuff_value?: number | null
+          description?: string | null
+          icon_emoji?: string
+          id?: string
+          name?: string
+          rarity?: string
+          unlock_requirement?: string | null
+        }
+        Relationships: []
+      }
       cosmetics: {
         Row: {
           asset_value: string | null
@@ -1190,11 +1235,14 @@ export type Database = {
           agi_attr: number
           anamnesis_complete: boolean
           avatar_glow_color: string | null
+          avatar_position: string
           avatar_url: string | null
+          banner_position: string
           banner_url: string | null
           bio: string | null
           class_name: Database["public"]["Enums"]["rpg_class"]
           created_at: string
+          current_class_id: string | null
           email: string | null
           end_attr: number
           frame_url: string | null
@@ -1229,11 +1277,14 @@ export type Database = {
           agi_attr?: number
           anamnesis_complete?: boolean
           avatar_glow_color?: string | null
+          avatar_position?: string
           avatar_url?: string | null
+          banner_position?: string
           banner_url?: string | null
           bio?: string | null
           class_name?: Database["public"]["Enums"]["rpg_class"]
           created_at?: string
+          current_class_id?: string | null
           email?: string | null
           end_attr?: number
           frame_url?: string | null
@@ -1268,11 +1319,14 @@ export type Database = {
           agi_attr?: number
           anamnesis_complete?: boolean
           avatar_glow_color?: string | null
+          avatar_position?: string
           avatar_url?: string | null
+          banner_position?: string
           banner_url?: string | null
           bio?: string | null
           class_name?: Database["public"]["Enums"]["rpg_class"]
           created_at?: string
+          current_class_id?: string | null
           email?: string | null
           end_attr?: number
           frame_url?: string | null
@@ -1304,6 +1358,13 @@ export type Database = {
           xp?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "profiles_current_class_id_fkey"
+            columns: ["current_class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "profiles_selected_title_id_fkey"
             columns: ["selected_title_id"]
@@ -1418,33 +1479,39 @@ export type Database = {
       }
       user_class_progress: {
         Row: {
-          class_key: string
-          current_tier: number | null
-          current_xp: number | null
+          class_id: string
+          class_level: number
+          class_rank: string
+          class_xp: number
           id: string
-          user_id: string | null
+          unlocked_at: string
+          user_id: string
         }
         Insert: {
-          class_key: string
-          current_tier?: number | null
-          current_xp?: number | null
+          class_id: string
+          class_level?: number
+          class_rank?: string
+          class_xp?: number
           id?: string
-          user_id?: string | null
+          unlocked_at?: string
+          user_id: string
         }
         Update: {
-          class_key?: string
-          current_tier?: number | null
-          current_xp?: number | null
+          class_id?: string
+          class_level?: number
+          class_rank?: string
+          class_xp?: number
           id?: string
-          user_id?: string | null
+          unlocked_at?: string
+          user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "user_class_progress_user_id_fkey"
-            columns: ["user_id"]
+            foreignKeyName: "user_class_progress_class_id_fkey"
+            columns: ["class_id"]
             isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["user_id"]
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
           },
         ]
       }

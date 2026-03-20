@@ -4,6 +4,7 @@ import { XPBar } from '@/components/rpg/XPBar';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { NotificationDropdown } from '@/components/shared/NotificationDropdown';
 
 export function Topbar() {
   const { profile, signOut } = useAuth();
@@ -34,9 +35,7 @@ export function Topbar() {
           <div className="flex-1" />
 
           {/* Notifications */}
-          <Button variant="ghost" size="icon" className="relative h-8 w-8">
-            <Bell className="h-4 w-4" />
-          </Button>
+          <NotificationDropdown />
 
           {/* Sign Out */}
           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleSignOut}>

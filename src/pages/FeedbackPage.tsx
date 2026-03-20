@@ -32,6 +32,7 @@ export default function FeedbackPage() {
   const [tab, setTab] = useState<FeedbackType>('suggestion');
   const [items, setItems] = useState<FeedbackItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   
   // Create Dialog State
   const [openCreate, setOpenCreate] = useState(false);
@@ -47,7 +48,7 @@ export default function FeedbackPage() {
       .from('feedback')
       .select(`
         *,
-        profiles ( name, username, class_name, level, avatar_url )
+        profiles!feedback_user_id_fkey ( name, username, class_name, level, avatar_url )
       `)
       .eq('type', tab)
       .order('created_at', { ascending: false })
@@ -55,9 +56,11 @@ export default function FeedbackPage() {
 
     if (error) {
       console.error(error);
+      setFetchError(error.message);
       setLoading(false);
       return;
     }
+    setFetchError(null);
 
     const { data: votesData } = await supabase
       .from('feedback_votes')
@@ -174,6 +177,12 @@ export default function FeedbackPage() {
         {loading ? (
           <div className="flex justify-center py-20">
             <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+          </div>
+        ) : fetchError ? (
+          <div className="flex flex-col items-center justify-center py-20 text-destructive bg-destructive/10 rounded-xl border border-dashed border-destructive/50">
+             <MessageSquare className="w-12 h-12 opacity-50 mb-4" />
+             <p className="font-bold">Erro ao carregar feedbacks</p>
+             <p className="text-sm font-mono mt-2">{fetchError}</p>
           </div>
         ) : items.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-muted-foreground bg-card/50 rounded-xl border border-dashed border-border">

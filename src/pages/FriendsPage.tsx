@@ -11,6 +11,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { SocialFeed } from '@/components/social/SocialFeed';
 import { useNavigate } from 'react-router-dom';
+import { PageSkeleton } from '@/components/shared/PageSkeleton';
 
 interface FriendProfile {
   user_id: string;
@@ -181,12 +182,7 @@ export default function FriendsPage() {
   const totalPending = pendingReceived.length + pendingSent.length;
 
   if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 gap-3">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="text-sm text-muted-foreground">Carregando amigos...</p>
-      </div>
-    );
+    return <PageSkeleton />;
   }
 
   return (

@@ -41,10 +41,10 @@ export function LevelUpModal({ previousLevel, newLevel, onClose }: LevelUpModalP
         }
       };
       
-      // Play a sound if possible (optional)
-      // const audio = new Audio('/sounds/level-up.mp3');
-      // audio.volume = 0.5;
-      // audio.play().catch(e => console.log('Audio play failed:', e));
+      // Play level up sound
+      const audio = new Audio('/levelup.mp3');
+      audio.volume = 0.6;
+      audio.play().catch(e => console.log('Audio play failed (maybe blocked by browser):', e));
 
       frame();
     }

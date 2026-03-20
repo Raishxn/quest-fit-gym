@@ -261,7 +261,9 @@ export default function WorkoutPage() {
       .eq('set_number', set.set_number);
 
     if (newCompleted) {
-      // Small visual feedback or sound could go here
+      const audio = new Audio('/check.mp3');
+      audio.volume = 0.4;
+      audio.play().catch(e => console.log('Audio error:', e));
     }
   };
 
@@ -305,6 +307,10 @@ export default function WorkoutPage() {
         }).eq('user_id', user.id);
         await recalculateLevel(user.id);
       }
+
+      const audio = new Audio('/rankuptier.mp3');
+      audio.volume = 0.5;
+      audio.play().catch(e => console.log('Audio error:', e));
 
       setRankUpInfo({ exercise: exercise.name, oldRank: currentRank, newRank });
       setExerciseRanks(prev => {

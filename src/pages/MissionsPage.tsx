@@ -73,6 +73,11 @@ export default function MissionsPage() {
     try {
       const result = await claimMissionReward(missionId, user!.id);
       const coinReward = Math.round((result?.xpReward || 0) / 5);
+      
+      const audio = new Audio('/completequest.mp3');
+      audio.volume = 0.5;
+      audio.play().catch(e => console.log('Audio error:', e));
+
       toast.success(`Recompensa resgatada! +${result?.xpReward} XP  +${coinReward} QC 🪙`);
       await refreshProfile();
       loadData();

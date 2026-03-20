@@ -72,6 +72,10 @@ export default function ShopPage() {
 
       if (insertErr) throw insertErr;
 
+      const audio = new Audio('/buy.mp3');
+      audio.volume = 0.5;
+      audio.play().catch(e => console.log('Audio error:', e));
+
       toast.success(`Você comprou: ${item.name}!`);
       
       // Refresh state

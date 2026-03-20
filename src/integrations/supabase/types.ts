@@ -683,6 +683,71 @@ export type Database = {
         }
         Relationships: []
       }
+      guild_members: {
+        Row: {
+          guild_id: string
+          id: string
+          joined_at: string | null
+          role: string | null
+          user_id: string
+        }
+        Insert: {
+          guild_id: string
+          id?: string
+          joined_at?: string | null
+          role?: string | null
+          user_id: string
+        }
+        Update: {
+          guild_id?: string
+          id?: string
+          joined_at?: string | null
+          role?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guild_members_guild_id_fkey"
+            columns: ["guild_id"]
+            isOneToOne: false
+            referencedRelation: "guilds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guilds: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          emblem_icon: string | null
+          id: string
+          level: number | null
+          name: string
+          owner_id: string | null
+          total_xp: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          emblem_icon?: string | null
+          id?: string
+          level?: number | null
+          name: string
+          owner_id?: string | null
+          total_xp?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          emblem_icon?: string | null
+          id?: string
+          level?: number | null
+          name?: string
+          owner_id?: string | null
+          total_xp?: number | null
+        }
+        Relationships: []
+      }
       meal_items: {
         Row: {
           calories: number
@@ -970,6 +1035,7 @@ export type Database = {
           banner_url: string | null
           bio: string | null
           class_name: Database["public"]["Enums"]["rpg_class"]
+          coins: number | null
           created_at: string
           current_class_id: string | null
           current_playlist_name: string | null
@@ -1133,6 +1199,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      shop_items: {
+        Row: {
+          content: string | null
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          is_premium: boolean | null
+          item_type: string
+          name: string
+          price: number
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_premium?: boolean | null
+          item_type: string
+          name: string
+          price?: number
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_premium?: boolean | null
+          item_type?: string
+          name?: string
+          price?: number
+        }
+        Relationships: []
       }
       social_comments: {
         Row: {
@@ -1345,6 +1447,42 @@ export type Database = {
           },
         ]
       }
+      user_purchases: {
+        Row: {
+          id: string
+          item_id: string | null
+          purchased_at: string
+          user_id: string | null
+        }
+        Insert: {
+          id?: string
+          item_id?: string | null
+          purchased_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          id?: string
+          item_id?: string | null
+          purchased_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_purchases_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "shop_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_purchases_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string
@@ -1360,6 +1498,39 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      user_missions: {
+        Row: {
+          created_at: string | null
+          date_assigned: string
+          id: string
+          is_completed: boolean | null
+          title: string
+          type: string
+          user_id: string
+          xp_reward: number
+        }
+        Insert: {
+          created_at?: string | null
+          date_assigned: string
+          id?: string
+          is_completed?: boolean | null
+          title: string
+          type: string
+          user_id: string
+          xp_reward?: number
+        }
+        Update: {
+          created_at?: string | null
+          date_assigned?: string
+          id?: string
+          is_completed?: boolean | null
+          title?: string
+          type?: string
+          user_id?: string
+          xp_reward?: number
         }
         Relationships: []
       }

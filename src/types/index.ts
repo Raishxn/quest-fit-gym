@@ -20,6 +20,7 @@ export interface UserProfile {
   theme: ThemeId;
   xp: number;
   level: number;
+  coins?: number;
   className: ClassName;
   specialization: Specialization;
   strAttr: number;

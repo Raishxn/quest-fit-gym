@@ -2,7 +2,8 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import type { UserProfile, ThemeId, ClassName, Specialization } from '@/types';
+import { LEVEL_TABLE, type UserProfile, type ThemeId, type ClassName, type Specialization } from '@/types';
+import { recalculateLevel } from '@/lib/level';
 
 interface AuthContextType {
   session: Session | null;
@@ -73,8 +74,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .select('role')
         .eq('user_id', userId)
         .maybeSingle();
-      
       const userRole = (roleRes.data as any)?.role || 'user';
+
+      // Auto-fix stuck levels on load
+      const currentXp = data.xp || 0;
+      let expectedLevelData = LEVEL_TABLE[0];
+      for (const entry of LEVEL_TABLE) {
+        if (currentXp >= entry.xpRequired) {
+          expectedLevelData = entry;
+        }
+      }
+
+      if (data.level < expectedLevelData.level) {
+        // User is owed a level up!
+        console.log(`Auto-fixing level discrepancy: ${data.level} -> ${expectedLevelData.level}`);
+        const { newLevel, newClassName } = await recalculateLevel(userId);
+        data.level = newLevel;
+        data.class_name = newClassName;
+      }
 
       const p: UserProfile = {
         id: data.id,
@@ -117,6 +134,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         profile_wallpaper_url: data.profile_wallpaper_url || '',
         avatar_frame: data.avatar_frame || 'none',
         is_owner: data.is_owner || false,
+        coins: data.coins ?? 0,
       };
       setProfile(p);
 

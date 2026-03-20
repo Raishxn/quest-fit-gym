@@ -16,22 +16,21 @@ export function CreateGuildDialog({ onCreated, children }: Props) {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
-  const [tag, setTag] = useState('');
   const [desc, setDesc] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleCreate = async () => {
-    if (!name || !tag) {
-      toast.error('Preencha nome e tag da guilda.');
+    if (!name) {
+      toast.error('Preencha o nome da guilda.');
       return;
     }
     setLoading(true);
     // Insert guild
-    const { data: guild, error } = (await supabase
-      .from('guilds' as any)
-      .insert({ name, tag: tag.toUpperCase(), description: desc, leader_id: user!.id })
+    const { data: guild, error } = await supabase
+      .from('guilds')
+      .insert({ name, description: desc, owner_id: user!.id })
       .select()
-      .single()) as any;
+      .single();
 
     if (error) {
       console.error(error);
@@ -42,7 +41,7 @@ export function CreateGuildDialog({ onCreated, children }: Props) {
 
     // Insert leader into members
     const { error: memberErr } = await supabase
-      .from('guild_members' as any)
+      .from('guild_members')
       .insert({ guild_id: guild.id, user_id: user!.id, role: 'leader' });
 
     if (memberErr) {
@@ -70,10 +69,6 @@ export function CreateGuildDialog({ onCreated, children }: Props) {
           <div className="space-y-2">
             <Label>Nome da Guilda</Label>
             <Input placeholder="Ex: Guerreiros da Luz" value={name} onChange={e => setName(e.target.value)} />
-          </div>
-          <div className="space-y-2">
-            <Label>TAG (3-5 letras)</Label>
-            <Input placeholder="GLZ" maxLength={5} value={tag} onChange={e => setTag(e.target.value)} />
           </div>
           <div className="space-y-2">
             <Label>Descrição</Label>

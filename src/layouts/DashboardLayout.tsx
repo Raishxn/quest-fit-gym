@@ -3,6 +3,7 @@ import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/shared/AppSidebar';
 import { Topbar } from '@/components/shared/Topbar';
 import { BottomNav } from '@/components/shared/BottomNav';
+import { LevelUpTracker } from '@/components/rpg/LevelUpTracker';
 
 export function DashboardLayout() {
   return (
@@ -17,6 +18,7 @@ export function DashboardLayout() {
         </div>
       </div>
       <BottomNav />
+      <LevelUpTracker />
     </SidebarProvider>
   );
 }

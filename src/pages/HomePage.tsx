@@ -38,7 +38,9 @@ export default function HomePage() {
 
   if (!profile) return null;
 
-  const calPercent = dietToday ? Math.min(100, (dietToday.total_calories / (dietToday.total_calories + 1)) * 100) : 0;
+  const calPercent = dietToday && dietToday.target_calories > 0 
+    ? Math.min(100, (dietToday.total_calories / dietToday.target_calories) * 100) 
+    : 0;
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
@@ -82,6 +84,20 @@ export default function HomePage() {
               <div>
                 <p className="text-3xl font-display font-bold">{profile.streak}</p>
                 <p className="text-sm text-muted-foreground">dias de streak</p>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}>
+          <Card>
+            <CardContent className="pt-4 flex items-center gap-4">
+              <div className="h-14 w-14 rounded-xl bg-yellow-500/10 flex items-center justify-center">
+                <img src="/questcoin.png" alt="QC" className="h-9 w-9 object-contain" />
+              </div>
+              <div>
+                <p className="text-3xl font-display font-bold text-yellow-400">{profile.coins || 0}</p>
+                <p className="text-sm text-muted-foreground">QuestCoins</p>
               </div>
             </CardContent>
           </Card>

@@ -21,22 +21,22 @@ export default function GuildsPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const { data: memberData } = (await supabase
-        .from('guild_members' as any)
+      const { data: memberData } = await supabase
+        .from('guild_members')
         .select('guild_id, role')
         .eq('user_id', user!.id)
-        .maybeSingle()) as any;
+        .maybeSingle();
 
       if (memberData) {
         const { data: guildData } = await supabase
-          .from('guilds' as any)
+          .from('guilds')
           .select('*')
           .eq('id', memberData.guild_id)
           .single();
         setMyGuild(guildData);
 
         const { data: membersData } = await supabase
-          .from('guild_members' as any)
+          .from('guild_members')
           .select('*, profiles(name, username)')
           .eq('guild_id', memberData.guild_id);
         setMembers(membersData || []);
@@ -45,7 +45,7 @@ export default function GuildsPage() {
         // Supabase foreign key count query trick is usually profiles(count)
         // We'll keep it simple for now and just fetch guilds.
         const { data: guildsData } = await supabase
-          .from('guilds' as any)
+          .from('guilds')
           .select('*');
         setAllGuilds(guildsData || []);
       }
@@ -60,20 +60,19 @@ export default function GuildsPage() {
   }, [user]);
 
   const joinGuild = async (guildId: string) => {
-    const { error } = await supabase.from('guild_members' as any).insert({ guild_id: guildId, user_id: user!.id });
+    const { error } = await supabase.from('guild_members').insert({ guild_id: guildId, user_id: user!.id });
     if (error) toast.error('Erro ao entrar na guilda');
     else { toast.success('Você entrou na guilda!'); loadData(); }
   };
 
   const leaveGuild = async () => {
-    const { error } = await supabase.from('guild_members' as any).delete().eq('user_id', user!.id);
+    const { error } = await supabase.from('guild_members').delete().eq('user_id', user!.id);
     if (error) toast.error('Erro ao sair da guilda');
     else { toast.success('Você saiu da guilda.'); loadData(); }
   };
 
   const filteredGuilds = allGuilds.filter(g => 
-    g.name.toLowerCase().includes(search.toLowerCase()) || 
-    g.tag.toLowerCase().includes(search.toLowerCase())
+    g.name.toLowerCase().includes(search.toLowerCase())
   );
 
   const GuildLobby = () => (
@@ -110,8 +109,8 @@ export default function GuildsPage() {
                          <Shield className="text-blue-500 w-5 h-5"/>
                        </div>
                        <div>
-                         <p className="font-bold text-sm">{guild.name} <span className="text-xs text-muted-foreground ml-1">[{guild.tag}]</span></p>
-                         <p className="text-xs text-muted-foreground">Poder: {guild.power || 0}</p>
+                         <p className="font-bold text-sm">{guild.name}</p>
+                         <p className="text-xs text-muted-foreground">Nível {guild.level || 1} • {guild.total_xp || 0} XP</p>
                        </div>
                     </div>
                     <Button size="sm" variant="secondary" onClick={() => joinGuild(guild.id)}>Entrar</Button>
@@ -141,7 +140,7 @@ export default function GuildsPage() {
           <div className="flex justify-between items-start">
             <div>
               <CardTitle className="flex items-center gap-2">
-                {myGuild.name} <span className="text-sm font-normal text-muted-foreground bg-secondary px-2 py-0.5 rounded-full">[{myGuild.tag}]</span>
+                {myGuild.name} 
               </CardTitle>
               <CardDescription className="mt-1">{myGuild.description || "Sem descrição"}</CardDescription>
             </div>
@@ -153,8 +152,8 @@ export default function GuildsPage() {
         <CardContent>
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-secondary/50 p-3 rounded-lg border border-border text-center">
-              <p className="text-xs text-muted-foreground mb-1">Poder da Guilda</p>
-              <p className="text-xl font-bold text-glow">{myGuild.power || 0}</p>
+              <p className="text-xs text-muted-foreground mb-1">Nível da Guilda</p>
+              <p className="text-xl font-bold text-glow">{myGuild.level || 1}</p>
             </div>
             <div className="bg-secondary/50 p-3 rounded-lg border border-border text-center">
               <p className="text-xs text-muted-foreground mb-1">Membros</p>

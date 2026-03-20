@@ -21,6 +21,7 @@ import FriendsPage from "./pages/FriendsPage";
 import PlaylistPage from "./pages/PlaylistPage";
 import ProgressPage from "./pages/ProgressPage";
 import SettingsPage from "./pages/SettingsPage";
+import ShopPage from "./pages/ShopPage";
 import UpgradePage from "./pages/UpgradePage";
 import SuccessPage from "./pages/SuccessPage";
 import NotFound from "./pages/NotFound";
@@ -36,6 +37,9 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUsersPage from "./pages/admin/AdminUsersPage";
 import AdminGiftCodesPage from "./pages/admin/AdminGiftCodesPage";
 import AdminExercisesPage from "./pages/admin/AdminExercisesPage";
+import AdminShopItemsPage from "./pages/admin/AdminShopItemsPage";
+import AdminRPGBalancingPage from "./pages/admin/AdminRPGBalancingPage";
+import AdminPatchNotesPage from "./pages/admin/AdminPatchNotesPage";
 
 const queryClient = new QueryClient();
 
@@ -70,6 +74,9 @@ const App = () => (
                 <Route path="/admin/users" element={<AdminUsersPage />} />
                 <Route path="/admin/gift-codes" element={<AdminGiftCodesPage />} />
                 <Route path="/admin/exercises" element={<AdminExercisesPage />} />
+                <Route path="/admin/shop" element={<AdminShopItemsPage />} />
+                <Route path="/admin/rpg" element={<AdminRPGBalancingPage />} />
+                <Route path="/admin/patch-notes" element={<AdminPatchNotesPage />} />
               </Route>
             </Route>
 
@@ -89,6 +96,7 @@ const App = () => (
               <Route path="/progress" element={<ProgressPage />} />
               <Route path="/missions" element={<MissionsPage />} />
               <Route path="/guilds" element={<GuildsPage />} />
+              <Route path="/shop" element={<ShopPage />} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="/updates" element={<UpdatesPage />} />
               <Route path="/terms" element={<TermsPage />} />

@@ -8,7 +8,7 @@ export default function UpdatesPage() {
   const [updates, setUpdates] = useState<any[]>([]);
 
   useEffect(() => {
-    supabase.from('app_updates').select('*').order('published_at', { ascending: false })
+    supabase.from('app_updates' as any).select('*').order('published_at', { ascending: false })
       .then(({ data }) => setUpdates(data || []));
   }, []);
 

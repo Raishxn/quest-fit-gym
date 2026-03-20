@@ -11,6 +11,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { InfoTooltip } from '@/components/ui/info-tooltip';
+import { recalculateLevel } from '@/lib/level';
 
 const steps = [
   { title: 'Dados Básicos', subtitle: 'Informações pessoais' },
@@ -129,6 +130,7 @@ export default function AnamnesisPage() {
       source: 'anamnesis_complete',
     });
 
+    await recalculateLevel(user.id);
     await refreshProfile();
     setSaving(false);
     toast.success('🧠 Anamnese completa! +200 XP');

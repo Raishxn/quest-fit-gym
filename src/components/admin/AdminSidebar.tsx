@@ -1,4 +1,4 @@
-import { Home, Users, Gift, Database, ShieldAlert, LogOut } from 'lucide-react';
+import { Home, Users, Gift, Database, ShieldAlert, LogOut, Store, Swords, ScrollText } from 'lucide-react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader, SidebarFooter } from '@/components/ui/sidebar';
 import { useAuth } from '@/hooks/useAuth';
@@ -8,6 +8,9 @@ const adminNavItems = [
   { term: 'Usuários', href: '/admin/users', icon: Users },
   { term: 'Códigos (Gift)', href: '/admin/gift-codes', icon: Gift },
   { term: 'Exercícios DB', href: '/admin/exercises', icon: Database },
+  { term: 'Loja (Shop)', href: '/admin/shop', icon: Store },
+  { term: 'RPG Balancing', href: '/admin/rpg', icon: Swords },
+  { term: 'Patch Notes', href: '/admin/patch-notes', icon: ScrollText },
 ];
 
 export function AdminSidebar() {

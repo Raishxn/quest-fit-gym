@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { recalculateLevel } from '@/lib/level';
 import { getRankTier, getNextRankInfo, getRankProgress, calculateRank, EXERCISE_RANK_CRITERIA, RANK_UP_MESSAGES } from '@/lib/exercise-ranks';
 import { PartyLobbyDialog } from '@/components/party/PartyLobbyDialog';
 import { toast } from 'sonner';
@@ -37,6 +38,7 @@ interface SetLog {
   weight_kg: number;
   reps: number;
   type: 'warmup' | 'working' | 'backoff';
+  is_completed?: boolean;
 }
 
 interface ActiveExercise {
@@ -46,7 +48,7 @@ interface ActiveExercise {
 }
 
 export default function WorkoutPage() {
-  const { user, profile } = useAuth();
+  const { user, profile, refreshProfile } = useAuth();
   const [programs, setPrograms] = useState<any[]>([]);
   const [recentSessions, setRecentSessions] = useState<WorkoutSession[]>([]);
   const [personalRecords, setPersonalRecords] = useState<any[]>([]);
@@ -124,7 +126,8 @@ export default function WorkoutPage() {
             weight_kg: s.weight_kg,
             reps: s.reps,
             type: s.type,
-          })),
+            is_completed: s.is_completed || false,
+          })).sort((a: any, b: any) => a.set_number - b.set_number),
         })));
       }
     }
@@ -217,11 +220,11 @@ export default function WorkoutPage() {
     }
 
     setActiveExercises(prev => prev.map((e, i) =>
-      i === exerciseIdx ? { ...e, sets: [...e.sets, { set_number: setNumber, weight_kg: lastSet?.weight_kg || 0, reps: lastSet?.reps || 10, type: 'working' as const }] } : e
+      i === exerciseIdx ? { ...e, sets: [...e.sets, { set_number: setNumber, weight_kg: lastSet?.weight_kg || 0, reps: lastSet?.reps || 10, type: 'working' as const, is_completed: false }] } : e
     ));
   };
 
-  const updateSet = async (exerciseIdx: number, setIdx: number, field: 'weight_kg' | 'reps' | 'type', value: number | string) => {
+  const updateSet = async (exerciseIdx: number, setIdx: number, field: 'weight_kg' | 'reps' | 'type' | 'is_completed', value: number | string | boolean) => {
     setActiveExercises(prev => prev.map((e, i) =>
       i === exerciseIdx ? {
         ...e,
@@ -242,6 +245,24 @@ export default function WorkoutPage() {
 
     // Check rank progression
     await checkRankProgression(ae.exercise, set.weight_kg, set.reps);
+  };
+
+  const toggleSetComplete = async (exerciseIdx: number, setIdx: number) => {
+    const ae = activeExercises[exerciseIdx];
+    const set = ae?.sets[setIdx];
+    if (!ae || !set) return;
+
+    const newCompleted = !set.is_completed;
+    updateSet(exerciseIdx, setIdx, 'is_completed', newCompleted);
+
+    await (supabase as any).from('set_logs')
+      .update({ is_completed: newCompleted })
+      .eq('exercise_log_id', ae.exerciseLogId)
+      .eq('set_number', set.set_number);
+
+    if (newCompleted) {
+      // Small visual feedback or sound could go here
+    }
   };
 
   const checkRankProgression = async (exercise: ExerciseOption, weightKg: number, reps: number) => {
@@ -275,13 +296,14 @@ export default function WorkoutPage() {
         });
       }
 
-      // Award Mastery Points (Rank index * 10)
-      const pmReward = newIdx * 10;
-      const { data: profileData } = await supabase.from('profiles').select('overall_mastery_points').eq('user_id', user.id).single();
+      // Award XP for ranking up (Rank index * 100)
+      const xpReward = newIdx * 100;
+      const { data: profileData } = await supabase.from('profiles').select('xp').eq('user_id', user.id).single();
       if (profileData) {
         await supabase.from('profiles').update({ 
-          overall_mastery_points: (profileData.overall_mastery_points || 0) + pmReward 
+          xp: (profileData.xp || 0) + xpReward 
         }).eq('user_id', user.id);
+        await recalculateLevel(user.id);
       }
 
       setRankUpInfo({ exercise: exercise.name, oldRank: currentRank, newRank });
@@ -345,7 +367,16 @@ export default function WorkoutPage() {
       xp: (await supabase.from('profiles').select('xp').eq('user_id', user.id).single()).data?.xp + xpGained,
     }).eq('user_id', user.id);
 
-    toast.success(`🎉 Treino finalizado! +${xpGained} XP — ${totalSets} séries, ${totalVolume.toLocaleString()}kg volume`);
+    // Call recalculateLevel to see if this XP pushed them over the edge
+    const { leveledUp, newLevel } = await recalculateLevel(user.id);
+    await refreshProfile();
+
+    if (leveledUp) {
+      toast.success(`🎉 SUBIU DE NÍVEL! Agora você é Nível ${newLevel}!\nTreino finalizado! +${xpGained} XP — ${totalSets} séries, ${totalVolume.toLocaleString()}kg volume`);
+    } else {
+      toast.success(`🎉 Treino finalizado! +${xpGained} XP — ${totalSets} séries, ${totalVolume.toLocaleString()}kg volume`);
+    }
+    
     // Show summary instead of immediately clearing
     setSessionSummary({ xpGained, totalSets, totalVolume, durationMin, sessionId: activeSession.id });
     setActiveSession(null);
@@ -513,16 +544,25 @@ export default function WorkoutPage() {
                           value={set.weight_kg}
                           onChange={e => updateSet(exIdx, setIdx, 'weight_kg', Number(e.target.value))}
                           onBlur={() => saveSetToDb(exIdx, setIdx)}
-                          className="h-8 font-mono text-sm"
+                          className={`h-8 font-mono text-sm ${set.is_completed ? 'opacity-50' : ''}`}
+                          disabled={set.is_completed}
                         />
                         <Input
                           type="number"
                           value={set.reps}
                           onChange={e => updateSet(exIdx, setIdx, 'reps', Number(e.target.value))}
                           onBlur={() => saveSetToDb(exIdx, setIdx)}
-                          className="h-8 font-mono text-sm"
+                          className={`h-8 font-mono text-sm ${set.is_completed ? 'opacity-50' : ''}`}
+                          disabled={set.is_completed}
                         />
-                        <Check className="h-4 w-4 text-success mx-auto" />
+                        <Button
+                          size="icon"
+                          variant={set.is_completed ? 'default' : 'outline'}
+                          className={`h-8 w-8 ml-auto ${set.is_completed ? 'bg-success hover:bg-success/90' : 'text-muted-foreground'}`}
+                          onClick={() => toggleSetComplete(exIdx, setIdx)}
+                        >
+                          <Check className="h-4 w-4" />
+                        </Button>
                       </div>
                     );
                   })}

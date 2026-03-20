@@ -1,24 +1,25 @@
-import { useLocation } from "react-router-dom";
-import { useEffect } from "react";
+import { Link } from 'react-router-dom';
+import { Home, Swords } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
-const NotFound = () => {
-  const location = useLocation();
-
-  useEffect(() => {
-    console.error("404 Error: User attempted to access non-existent route:", location.pathname);
-  }, [location.pathname]);
-
+export default function NotFound() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">404</h1>
-        <p className="mb-4 text-xl text-muted-foreground">Oops! Page not found</p>
-        <a href="/" className="text-primary underline hover:text-primary/90">
-          Return to Home
-        </a>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-background text-foreground p-6">
+      <div className="text-center space-y-6 max-w-md animate-in fade-in zoom-in-95 duration-700">
+        <div className="text-8xl font-display font-bold text-primary drop-shadow-lg">404</div>
+        <h1 className="text-2xl font-display font-bold">Área Desconhecida</h1>
+        <p className="text-muted-foreground">
+          Parece que você se perdeu no mapa, aventureiro. Esta região ainda não foi explorada.
+        </p>
+        <div className="flex gap-3 justify-center">
+          <Button asChild>
+            <Link to="/home"><Home className="w-4 h-4 mr-2" />Voltar ao QG</Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link to="/missions"><Swords className="w-4 h-4 mr-2" />Ver Missões</Link>
+          </Button>
+        </div>
       </div>
     </div>
   );
-};
-
-export default NotFound;
+}

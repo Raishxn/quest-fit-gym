@@ -41,32 +41,41 @@ function MissionCountdown({ targetDate }: { targetDate: Date }) {
   return <span className="text-xs font-mono font-bold bg-secondary/80 text-muted-foreground px-3 py-1 rounded-full flex items-center justify-center gap-1.5 ring-1 ring-border shadow-inner"><Clock className="w-3.5 h-3.5" /> Atualiza em {timeLeft}</span>;
 }
 
-export default function MissionsPage() {
+function MissionsPage() {
   const { user, refreshProfile } = useAuth();
   const [missions, setMissions] = useState<UserMission[]>([]);
   const [globalMissions, setGlobalMissions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [claimingId, setClaimingId] = useState<string | null>(null);
 
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
   useEffect(() => {
     if (user) loadData();
   }, [user]);
 
   const loadData = async () => {
-    setLoading(true);
-    
-    const globalsPromise = supabase
-      .from('global_missions' as any)
-      .select('*')
-      .eq('is_active', true);
+    try {
+      setLoading(true);
+      setErrorMsg(null);
+      
+      const globalsPromise = supabase
+        .from('global_missions' as any)
+        .select('*')
+        .eq('is_active', true);
 
-    await checkAndGenerateDailyMissions(user!.id);
-    const userMissions = await fetchActiveMissions(user!.id); // This auto-checks completion!
-    const { data: globals } = await globalsPromise;
+      await checkAndGenerateDailyMissions(user!.id);
+      const userMissions = await fetchActiveMissions(user!.id); // This auto-checks completion!
+      const { data: globals } = await globalsPromise;
 
-    setMissions(userMissions || []);
-    setGlobalMissions(globals || []);
-    setLoading(false);
+      setMissions(userMissions || []);
+      setGlobalMissions(globals || []);
+    } catch (err: any) {
+      console.error("Error loading missions:", err);
+      setErrorMsg(err.message || String(err));
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleClaim = async (missionId: string) => {
@@ -84,8 +93,9 @@ export default function MissionsPage() {
       loadData();
     } catch (error: any) {
       toast.error(error.message || 'Erro ao resgatar recompensa.');
+    } finally {
+      setClaimingId(null);
     }
-    setClaimingId(null);
   };
 
   const renderMissionCard = (mission: UserMission) => {
@@ -178,6 +188,21 @@ export default function MissionsPage() {
     return <PageSkeleton />;
   }
 
+  if (errorMsg) {
+    return (
+      <div className="max-w-4xl mx-auto pb-20 p-4">
+        <div className="bg-red-500/10 border border-red-500/50 rounded-xl p-6 text-center">
+          <h2 className="text-red-500 font-bold text-lg mb-2">Erro de Carregamento</h2>
+          <p className="text-muted-foreground mb-4">Houve um erro ao carregar as missões. Por favor, avise o suporte (O Erick!). Detalhes do erro:</p>
+          <pre className="bg-black/50 p-4 rounded text-left text-red-300 text-xs overflow-auto">
+            {errorMsg}
+          </pre>
+          <Button onClick={loadData} className="mt-4">Tentar Novamente</Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-4xl mx-auto pb-20 space-y-8 animate-in slide-in-from-bottom-4 duration-500">
       <div className="flex items-center gap-4 mb-8">
@@ -247,5 +272,39 @@ export default function MissionsPage() {
         </TabsContent>
       </Tabs>
     </div>
+  );
+}
+
+import React from 'react';
+
+class SimpleErrorBoundary extends React.Component<{children: any}, {hasError: boolean, error: any}> {
+  constructor(props: {children: any}) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error: any) {
+    return { hasError: true, error };
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="p-10 text-red-500 bg-black min-h-screen z-50 fixed inset-0 overflow-auto">
+          <h1 className="text-2xl font-bold mb-4">CRITICAL REACT CRASH!</h1>
+          <p>Please screenshot this exact screen and send it to the developer (Erick):</p>
+          <pre className="mt-4 p-4 bg-gray-900 border border-red-900 rounded whitespace-pre-wrap text-sm">
+            {this.state.error?.stack || String(this.state.error)}
+          </pre>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+export default function MissionsPageWrapper() {
+  return (
+    <SimpleErrorBoundary>
+      <MissionsPage />
+    </SimpleErrorBoundary>
   );
 }

@@ -7,6 +7,7 @@ import { fetchActiveMissions, claimMissionReward, checkAndGenerateDailyMissions,
 import { Medal, CheckCircle2, Gift, Loader2, Clock, Circle } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { PageSkeleton } from '@/components/shared/PageSkeleton';
 
 /** Calcula as datas de reset */
 const getNextDailyReset = () => { const d = new Date(); d.setHours(23, 59, 59, 999); return d; }
@@ -235,10 +236,10 @@ export default function MissionsPage() {
               <CardContent>
                 <div className="flex justify-between text-xs font-medium text-muted-foreground mb-2">
                   <span>Progresso da Comunidade</span>
-                  <span>{(m.current_value || 0).toLocaleString()} / {m.objective_value.toLocaleString()}</span>
+                  <span>{(m.current_value || 0).toLocaleString()} / {(m.objective_value || 1).toLocaleString()}</span>
                 </div>
                 <div className="w-full bg-secondary rounded-full h-3 overflow-hidden">
-                  <div className="bg-primary h-full rounded-full transition-all duration-500" style={{ width: `${Math.min(100, ((m.current_value || 0) / m.objective_value) * 100)}%` }} />
+                  <div className="bg-primary h-full rounded-full transition-all duration-500" style={{ width: `${Math.min(100, ((m.current_value || 0) / (m.objective_value || 1)) * 100)}%` }} />
                 </div>
               </CardContent>
             </Card>

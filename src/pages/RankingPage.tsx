@@ -214,7 +214,7 @@ export default function RankingPage() {
               <motion.div key={`${mainTab}-${subTab}`} initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}>
                 <Podium data={data} getValueKey={getValueDisplay} getSecondaryValueKey={getSecondaryDisplay} />
                 <div className="w-full h-px bg-border/50 mb-4" />
-                <LeaderboardList data={data} userId={user?.id} getValueKey={getValueDisplay} getSecondaryValueKey={getSecondaryDisplay} />
+                <LeaderboardList data={data} userId={user?.id} getValueKey={getValueDisplay} getSecondaryValueKey={getSecondaryDisplay} showChallengeButton={mainTab !== 'guilds'} />
               </motion.div>
             </AnimatePresence>
           )}

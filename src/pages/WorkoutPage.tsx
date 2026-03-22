@@ -13,6 +13,7 @@ import { getRankTier, getNextRankInfo, getRankProgress, calculateRank, EXERCISE_
 import { PartyLobbyDialog } from '@/components/party/PartyLobbyDialog';
 import { BarbellCalculatorDialog } from '@/components/workout/BarbellCalculatorDialog';
 import { AnimatedEmptyState } from '@/components/ui/AnimatedEmptyState';
+import { checkWorkoutAchievements } from '@/utils/achievementEngine';
 import { toast } from 'sonner';
 import confetti from 'canvas-confetti';
 
@@ -377,6 +378,18 @@ export default function WorkoutPage() {
           best_reps: reps,
         });
       }
+      
+      // Auto-post PR to Feed
+      await supabase.from('social_posts' as any).insert({
+        user_id: user.id,
+        content: `Acabou de bater um novo Recorde Pessoal!`,
+        workout_summary: {
+          type: 'achieved_pr',
+          exercise: exercise.name,
+          weight: weightKg,
+          unit: 'kg'
+        }
+      });
     }
   };
 
@@ -426,9 +439,27 @@ export default function WorkoutPage() {
 
     if (leveledUp) {
       toast.success(`🎉 SUBIU DE NÍVEL! Agora você é Nível ${newLevel}!\nTreino finalizado! +${xpGained} XP — ${totalSets} séries, ${totalVolume.toLocaleString()}kg volume`);
+      
+      // Auto-post Level Up to Feed
+      await supabase.from('social_posts' as any).insert({
+        user_id: user.id,
+        content: `Subiu para o Nível ${newLevel}!`,
+        workout_summary: {
+           type: 'level_up',
+           level: newLevel,
+           title: profile?.currentClass?.name || profile?.className || 'Aventureiro'
+        }
+      });
     } else {
       toast.success(`🎉 Treino finalizado! +${xpGained} XP — ${totalSets} séries, ${totalVolume.toLocaleString()}kg volume`);
     }
+    
+    // Check achievements
+    await checkWorkoutAchievements(user.id, {
+      volume: totalVolume,
+      durationSeconds: sessionTimer,
+      endTime: new Date()
+    });
     
     // Show summary instead of immediately clearing
     setSessionSummary({ xpGained, totalSets, totalVolume, durationMin, sessionId: activeSession.id });

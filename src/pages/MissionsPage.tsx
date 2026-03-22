@@ -8,6 +8,7 @@ import { Medal, CheckCircle2, Gift, Loader2, Clock, Circle } from 'lucide-react'
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { PageSkeleton } from '@/components/shared/PageSkeleton';
+import { PvPChallenges } from '@/components/ranking/PvPChallenges';
 
 /** Calcula as datas de reset */
 const getNextDailyReset = () => { const d = new Date(); d.setHours(23, 59, 59, 999); return d; }
@@ -221,6 +222,7 @@ function MissionsPage() {
           <TabsTrigger value="weekly" className="py-2.5 px-4 rounded-lg">Semanais</TabsTrigger>
           <TabsTrigger value="monthly" className="py-2.5 px-4 rounded-lg">Mensais</TabsTrigger>
           <TabsTrigger value="global" className="py-2.5 px-4 rounded-lg">Globais</TabsTrigger>
+          <TabsTrigger value="pvp" className="py-2.5 px-4 rounded-lg">Desafios PvP</TabsTrigger>
         </TabsList>
         
         <TabsContent value="daily" className="mt-6 space-y-4 outline-none">
@@ -269,6 +271,10 @@ function MissionsPage() {
               </CardContent>
             </Card>
           ))}
+        </TabsContent>
+        
+        <TabsContent value="pvp" className="mt-6 outline-none">
+           <PvPChallenges />
         </TabsContent>
       </Tabs>
     </div>

@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { CreateGuildDialog } from '@/components/guild/CreateGuildDialog';
 import { InfoTooltip } from '@/components/ui/info-tooltip';
 import { AnimatedEmptyState } from '@/components/ui/AnimatedEmptyState';
+import { GuildChat } from '@/components/guild/GuildChat';
 
 export default function GuildsPage() {
   const { user } = useAuth();
@@ -172,10 +173,14 @@ export default function GuildsPage() {
         </CardContent>
       </Card>
 
-      <Tabs defaultValue="members">
+      <Tabs defaultValue="chat">
         <TabsList className="w-full">
+          <TabsTrigger value="chat" className="flex-1">Chat</TabsTrigger>
           <TabsTrigger value="members" className="flex-1">Membros</TabsTrigger>
         </TabsList>
+        <TabsContent value="chat" className="mt-4">
+          <GuildChat guildId={myGuild.id} />
+        </TabsContent>
         <TabsContent value="members" className="mt-4">
           <Card className="bg-card border-border">
              <CardContent className="pt-6 space-y-4">

@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Heart, MessageCircle, Send, Loader2, Dumbbell, Timer, BarChart3, Zap } from 'lucide-react';
+import { Heart, MessageCircle, Send, Loader2, Dumbbell, Timer, BarChart3, Zap, Trophy } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '@/components/ui/input';
@@ -29,7 +29,6 @@ export function SocialFeed() {
     const { data: postsData, error } = await supabase
       .from('social_posts')
       .select('*')
-      .not('workout_summary', 'is', null)
       .order('created_at', { ascending: false })
       .limit(50);
 
@@ -54,17 +53,17 @@ export function SocialFeed() {
       .in('user_id', authorIds);
     const profileMap = new Map((profilesData || []).map(p => [p.user_id, p]));
 
-    // Fetch likes & comments
+    // Fetch reactions & comments
     const postIds = postsData.map(p => p.id);
-    const [{ data: likesData }, { data: commentsData }] = await Promise.all([
-      supabase.from('social_likes').select('post_id, user_id').in('post_id', postIds),
+    const [{ data: reactionsData }, { data: commentsData }] = await Promise.all([
+      supabase.from('post_reactions').select('post_id, user_id, emoji_type').in('post_id', postIds),
       supabase.from('social_comments').select('*, profiles(name, username, avatar_url)').in('post_id', postIds).order('created_at', { ascending: true }),
     ]);
 
     const enriched = postsData.map(post => ({
       ...post,
       profiles: profileMap.get(post.user_id) || null,
-      social_likes: (likesData || []).filter(l => l.post_id === post.id),
+      post_reactions: (reactionsData || []).filter(r => r.post_id === post.id),
       social_comments: (commentsData || []).filter(c => c.post_id === post.id),
     }));
 
@@ -72,12 +71,15 @@ export function SocialFeed() {
     setLoading(false);
   };
 
-  const toggleLike = async (postId: string, hasLiked: boolean) => {
+  const toggleReaction = async (postId: string, emoji: string) => {
     if (!user) return;
-    if (hasLiked) {
-      await supabase.from('social_likes').delete().eq('post_id', postId).eq('user_id', user.id);
+    const post = posts.find(p => p.id === postId);
+    const hasReacted = post?.post_reactions?.some((r: any) => r.user_id === user.id && r.emoji_type === emoji);
+    
+    if (hasReacted) {
+      await supabase.from('post_reactions').delete().eq('post_id', postId).eq('user_id', user.id).eq('emoji_type', emoji);
     } else {
-      await supabase.from('social_likes').insert({ post_id: postId, user_id: user.id });
+      await supabase.from('post_reactions').insert({ post_id: postId, user_id: user.id, emoji_type: emoji });
     }
     loadPosts();
   };
@@ -122,8 +124,15 @@ export function SocialFeed() {
       <div className="space-y-4">
         {posts.map(post => {
           const author = post.profiles;
-          const hasLiked = post.social_likes?.some((l: any) => l.user_id === user?.id);
-          const likesCount = post.social_likes?.length || 0;
+          
+          // Count reactions
+          const reactions = post.post_reactions || [];
+          const reactionCounts = reactions.reduce((acc: any, curr: any) => {
+            acc[curr.emoji_type] = (acc[curr.emoji_type] || 0) + 1;
+            return acc;
+          }, {});
+          
+          const userReactions = reactions.filter((r: any) => r.user_id === user?.id).map((r: any) => r.emoji_type);
           const commentsCount = post.social_comments?.length || 0;
           const ws = post.workout_summary as any;
 
@@ -183,6 +192,23 @@ export function SocialFeed() {
                     </div>
                   )}
 
+                  {ws && ws.type === 'achieved_pr' && (
+                    <div className="bg-gradient-to-br from-yellow-500/20 to-yellow-600/5 rounded-xl p-4 border border-yellow-500/30 text-center">
+                       <Trophy className="h-8 w-8 text-yellow-400 mx-auto mb-2" />
+                       <h4 className="font-display font-bold text-yellow-400">NOVO PR REGISTRADO!</h4>
+                       <p className="text-xl font-bold mt-1">{ws.exercise}</p>
+                       <p className="text-muted-foreground mt-2 font-mono text-2xl">{ws.weight} {ws.unit}</p>
+                    </div>
+                  )}
+
+                  {ws && ws.type === 'level_up' && (
+                    <div className="bg-gradient-to-br from-purple-500/20 to-purple-600/5 rounded-xl p-4 border border-purple-500/30 text-center">
+                       <Zap className="h-8 w-8 text-purple-400 mx-auto mb-2 animate-bounce" />
+                       <h4 className="font-display font-bold text-purple-400">{ws.title || 'LEVEL UP!'}</h4>
+                       <p className="text-xl font-bold mt-1">Nível {ws.level}</p>
+                    </div>
+                  )}
+
                   {/* Caption if any */}
                   {post.content && (
                     <p className="whitespace-pre-wrap text-sm">{post.content}</p>
@@ -196,16 +222,26 @@ export function SocialFeed() {
                   )}
 
                   {/* Actions */}
-                  <div className="flex items-center gap-6 pt-2 border-t border-border">
+                  <div className="flex items-center gap-4 pt-4 border-t border-border">
+                    <div className="flex items-center bg-secondary/50 rounded-full px-2 py-1">
+                      {['🔥', '💪', '🛡️'].map(emoji => {
+                        const count = reactionCounts[emoji] || 0;
+                        const hasReacted = userReactions.includes(emoji);
+                        return (
+                          <button
+                            key={emoji}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm transition-colors ${hasReacted ? 'bg-primary/20 text-primary' : 'hover:bg-background text-muted-foreground hover:text-foreground'}`}
+                            onClick={() => toggleReaction(post.id, emoji)}
+                          >
+                            <span className="text-lg">{emoji}</span>
+                            {count > 0 && <span className="font-medium">{count}</span>}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    
                     <button
-                      className={`flex items-center gap-1.5 text-sm transition-colors ${hasLiked ? 'text-red-500' : 'text-muted-foreground hover:text-red-500'}`}
-                      onClick={() => toggleLike(post.id, hasLiked)}
-                    >
-                      <Heart className={`h-4 w-4 ${hasLiked ? 'fill-current' : ''}`} />
-                      <span>{likesCount}</span>
-                    </button>
-                    <button
-                      className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors"
+                      className="flex items-center gap-1.5 text-sm font-medium ml-auto px-4 py-2 rounded-full bg-secondary/50 hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
                       onClick={() => setExpandedComments({ ...expandedComments, [post.id]: !expandedComments[post.id] })}
                     >
                       <MessageCircle className="h-4 w-4" />

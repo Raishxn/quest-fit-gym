@@ -181,6 +181,30 @@ export type Database = {
         }
         Relationships: []
       }
+      app_updates: {
+        Row: {
+          body: string
+          id: string
+          published_at: string | null
+          title: string
+          version: string
+        }
+        Insert: {
+          body: string
+          id?: string
+          published_at?: string | null
+          title: string
+          version: string
+        }
+        Update: {
+          body?: string
+          id?: string
+          published_at?: string | null
+          title?: string
+          version?: string
+        }
+        Relationships: []
+      }
       body_measurements: {
         Row: {
           body_fat_percent: number | null
@@ -256,6 +280,67 @@ export type Database = {
         }
         Relationships: []
       }
+      challenges: {
+        Row: {
+          created_at: string
+          creator_id: string | null
+          end_date: string | null
+          id: string
+          start_date: string | null
+          status: string | null
+          target_id: string | null
+          type: string
+          updated_at: string
+          winner_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          creator_id?: string | null
+          end_date?: string | null
+          id?: string
+          start_date?: string | null
+          status?: string | null
+          target_id?: string | null
+          type: string
+          updated_at?: string
+          winner_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          creator_id?: string | null
+          end_date?: string | null
+          id?: string
+          start_date?: string | null
+          status?: string | null
+          target_id?: string | null
+          type?: string
+          updated_at?: string
+          winner_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenges_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "challenges_target_id_fkey"
+            columns: ["target_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "challenges_winner_id_fkey"
+            columns: ["winner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       classes: {
         Row: {
           archetype: string
@@ -300,6 +385,41 @@ export type Database = {
           unlock_requirement?: string | null
         }
         Relationships: []
+      }
+      daily_login_rewards: {
+        Row: {
+          created_at: string
+          current_streak: number | null
+          id: string
+          last_claim_date: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          current_streak?: number | null
+          id?: string
+          last_claim_date: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          current_streak?: number | null
+          id?: string
+          last_claim_date?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_login_rewards_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       diet_days: {
         Row: {
@@ -518,6 +638,77 @@ export type Database = {
           },
         ]
       }
+      feedback: {
+        Row: {
+          created_at: string | null
+          description: string
+          id: string
+          status: string | null
+          title: string
+          type: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description: string
+          id?: string
+          status?: string | null
+          title: string
+          type: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string
+          id?: string
+          status?: string | null
+          title?: string
+          type?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      feedback_votes: {
+        Row: {
+          created_at: string | null
+          feedback_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          feedback_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          feedback_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_votes_feedback_id_fkey"
+            columns: ["feedback_id"]
+            isOneToOne: false
+            referencedRelation: "feedback"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_votes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       foods: {
         Row: {
           brand: string | null
@@ -685,25 +876,25 @@ export type Database = {
       }
       guild_members: {
         Row: {
-          guild_id: string
+          guild_id: string | null
           id: string
-          joined_at: string | null
+          joined_at: string
           role: string | null
-          user_id: string
+          user_id: string | null
         }
         Insert: {
-          guild_id: string
+          guild_id?: string | null
           id?: string
-          joined_at?: string | null
+          joined_at?: string
           role?: string | null
-          user_id: string
+          user_id?: string | null
         }
         Update: {
-          guild_id?: string
+          guild_id?: string | null
           id?: string
-          joined_at?: string | null
+          joined_at?: string
           role?: string | null
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -713,38 +904,81 @@ export type Database = {
             referencedRelation: "guilds"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "guild_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      guild_messages: {
+        Row: {
+          content: string
+          created_at: string
+          guild_id: string | null
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          guild_id?: string | null
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          guild_id?: string | null
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guild_messages_guild_id_fkey"
+            columns: ["guild_id"]
+            isOneToOne: false
+            referencedRelation: "guilds"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guild_messages_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       guilds: {
         Row: {
-          created_at: string | null
+          created_at: string
           description: string | null
-          emblem_icon: string | null
           id: string
           level: number | null
           name: string
-          owner_id: string | null
           total_xp: number | null
+          updated_at: string
         }
         Insert: {
-          created_at?: string | null
+          created_at?: string
           description?: string | null
-          emblem_icon?: string | null
           id?: string
           level?: number | null
           name: string
-          owner_id?: string | null
           total_xp?: number | null
+          updated_at?: string
         }
         Update: {
-          created_at?: string | null
+          created_at?: string
           description?: string | null
-          emblem_icon?: string | null
           id?: string
           level?: number | null
           name?: string
-          owner_id?: string | null
           total_xp?: number | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -1024,6 +1258,45 @@ export type Database = {
           },
         ]
       }
+      post_reactions: {
+        Row: {
+          created_at: string
+          emoji_type: string
+          id: string
+          post_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          emoji_type: string
+          id?: string
+          post_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          emoji_type?: string
+          id?: string
+          post_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_reactions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "social_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_reactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           agi_attr: number
@@ -1043,6 +1316,7 @@ export type Database = {
           email: string | null
           end_attr: number
           id: string
+          is_owner: boolean | null
           last_activity_date: string | null
           last_seen: string | null
           level: number
@@ -1055,6 +1329,7 @@ export type Database = {
           privacy_share_status: boolean | null
           profile_gradient: string | null
           profile_wallpaper_url: string | null
+          selected_title_id: string | null
           specialization: Database["public"]["Enums"]["specialization"] | null
           str_attr: number
           streak: number
@@ -1076,6 +1351,7 @@ export type Database = {
           banner_url?: string | null
           bio?: string | null
           class_name?: Database["public"]["Enums"]["rpg_class"]
+          coins?: number | null
           created_at?: string
           current_class_id?: string | null
           current_playlist_name?: string | null
@@ -1083,6 +1359,7 @@ export type Database = {
           email?: string | null
           end_attr?: number
           id?: string
+          is_owner?: boolean | null
           last_activity_date?: string | null
           last_seen?: string | null
           level?: number
@@ -1095,6 +1372,7 @@ export type Database = {
           privacy_share_status?: boolean | null
           profile_gradient?: string | null
           profile_wallpaper_url?: string | null
+          selected_title_id?: string | null
           specialization?: Database["public"]["Enums"]["specialization"] | null
           str_attr?: number
           streak?: number
@@ -1116,6 +1394,7 @@ export type Database = {
           banner_url?: string | null
           bio?: string | null
           class_name?: Database["public"]["Enums"]["rpg_class"]
+          coins?: number | null
           created_at?: string
           current_class_id?: string | null
           current_playlist_name?: string | null
@@ -1123,6 +1402,7 @@ export type Database = {
           email?: string | null
           end_attr?: number
           id?: string
+          is_owner?: boolean | null
           last_activity_date?: string | null
           last_seen?: string | null
           level?: number
@@ -1135,6 +1415,7 @@ export type Database = {
           privacy_share_status?: boolean | null
           profile_gradient?: string | null
           profile_wallpaper_url?: string | null
+          selected_title_id?: string | null
           specialization?: Database["public"]["Enums"]["specialization"] | null
           str_attr?: number
           streak?: number
@@ -1154,6 +1435,13 @@ export type Database = {
             referencedRelation: "classes"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "profiles_selected_title_id_fkey"
+            columns: ["selected_title_id"]
+            isOneToOne: false
+            referencedRelation: "titles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       set_logs: {
@@ -1161,6 +1449,7 @@ export type Database = {
           completed_at: string
           exercise_log_id: string
           id: string
+          is_completed: boolean
           reps: number
           rest_seconds: number | null
           rpe: number | null
@@ -1172,6 +1461,7 @@ export type Database = {
           completed_at?: string
           exercise_log_id: string
           id?: string
+          is_completed?: boolean
           reps: number
           rest_seconds?: number | null
           rpe?: number | null
@@ -1183,6 +1473,7 @@ export type Database = {
           completed_at?: string
           exercise_log_id?: string
           id?: string
+          is_completed?: boolean
           reps?: number
           rest_seconds?: number | null
           rpe?: number | null
@@ -1380,6 +1671,39 @@ export type Database = {
         }
         Relationships: []
       }
+      titles: {
+        Row: {
+          buff_type: string | null
+          buff_value: number | null
+          description: string
+          id: string
+          is_unique: boolean | null
+          name: string
+          requirement_type: string | null
+          requirement_value: number | null
+        }
+        Insert: {
+          buff_type?: string | null
+          buff_value?: number | null
+          description: string
+          id?: string
+          is_unique?: boolean | null
+          name: string
+          requirement_type?: string | null
+          requirement_value?: number | null
+        }
+        Update: {
+          buff_type?: string | null
+          buff_value?: number | null
+          description?: string
+          id?: string
+          is_unique?: boolean | null
+          name?: string
+          requirement_type?: string | null
+          requirement_value?: number | null
+        }
+        Relationships: []
+      }
       user_achievements: {
         Row: {
           achievement_id: string
@@ -1447,6 +1771,42 @@ export type Database = {
           },
         ]
       }
+      user_missions: {
+        Row: {
+          created_at: string
+          date_assigned: string
+          id: string
+          is_claimed: boolean
+          is_completed: boolean
+          title: string
+          type: string
+          user_id: string
+          xp_reward: number
+        }
+        Insert: {
+          created_at?: string
+          date_assigned: string
+          id?: string
+          is_claimed?: boolean
+          is_completed?: boolean
+          title: string
+          type?: string
+          user_id: string
+          xp_reward?: number
+        }
+        Update: {
+          created_at?: string
+          date_assigned?: string
+          id?: string
+          is_claimed?: boolean
+          is_completed?: boolean
+          title?: string
+          type?: string
+          user_id?: string
+          xp_reward?: number
+        }
+        Relationships: []
+      }
       user_purchases: {
         Row: {
           id: string
@@ -1501,38 +1861,44 @@ export type Database = {
         }
         Relationships: []
       }
-      user_missions: {
+      user_titles: {
         Row: {
-          created_at: string | null
-          date_assigned: string
           id: string
-          is_completed: boolean | null
-          title: string
-          type: string
-          user_id: string
-          xp_reward: number
+          is_equipped: boolean | null
+          title_id: string | null
+          unlocked_at: string | null
+          user_id: string | null
         }
         Insert: {
-          created_at?: string | null
-          date_assigned: string
           id?: string
-          is_completed?: boolean | null
-          title: string
-          type: string
-          user_id: string
-          xp_reward?: number
+          is_equipped?: boolean | null
+          title_id?: string | null
+          unlocked_at?: string | null
+          user_id?: string | null
         }
         Update: {
-          created_at?: string | null
-          date_assigned?: string
           id?: string
-          is_completed?: boolean | null
-          title?: string
-          type?: string
-          user_id?: string
-          xp_reward?: number
+          is_equipped?: boolean | null
+          title_id?: string | null
+          unlocked_at?: string | null
+          user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_titles_title_id_fkey"
+            columns: ["title_id"]
+            isOneToOne: false
+            referencedRelation: "titles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_titles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       workout_days: {
         Row: {
@@ -1731,6 +2097,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"

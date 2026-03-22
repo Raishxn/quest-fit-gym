@@ -21,6 +21,7 @@ import { VIPCustomizerDialog } from '@/components/rpg/VIPCustomizerDialog';
 import ImageCropDialog from '@/components/shared/ImageCropDialog';
 import { PlanBadge } from '@/components/shared/PlanBadge';
 import { UploadOptionsDialog } from '@/components/profile/UploadOptionsDialog';
+import { ConsistencyHeatmap } from '@/components/profile/ConsistencyHeatmap';
 
 export default function ProfilePage() {
   const { profile, user, refreshProfile } = useAuth();
@@ -361,6 +362,10 @@ export default function ProfilePage() {
             </Card>
           ))}
         </div>
+      </motion.div>
+
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.17 }}>
+        <ConsistencyHeatmap userId={user.id} />
       </motion.div>
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>

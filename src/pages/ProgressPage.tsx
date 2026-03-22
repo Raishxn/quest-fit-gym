@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { WeeklyRecapModal } from '@/components/progress/WeeklyRecapModal';
 
 type Period = '7d' | '30d' | 'custom';
 
@@ -477,75 +478,9 @@ export default function ProgressPage() {
         </motion.div>
       )}
 
-      {/* Weekly Report Dialog (auto-shown on Saturday) */}
-      <Dialog open={showWeeklyReport} onOpenChange={setShowWeeklyReport}>
-        <DialogContent className="max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="font-display text-lg">📊 Relatório Semanal</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-3">
-              <Card>
-                <CardContent className="pt-3 text-center">
-                  <p className="font-mono text-xl font-bold">{weeklyReport.sessionsCount}</p>
-                  <p className="text-[10px] text-muted-foreground">Treinos</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="pt-3 text-center">
-                  <p className="font-mono text-xl font-bold">{weeklyReport.totalVolume.toLocaleString()}kg</p>
-                  <p className="text-[10px] text-muted-foreground">Volume Total</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="pt-3 text-center">
-                  <p className="font-mono text-xl font-bold">{weeklyReport.totalSets}</p>
-                  <p className="text-[10px] text-muted-foreground">Séries Totais</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="pt-3 text-center">
-                  <p className="font-mono text-xl font-bold">{weeklyReport.cardioMinutes}min</p>
-                  <p className="text-[10px] text-muted-foreground">Cardio</p>
-                </CardContent>
-              </Card>
-            </div>
-
-            {weightChange && (
-              <div className="p-3 rounded-lg bg-secondary/50 text-center">
-                <p className="text-xs text-muted-foreground">Peso Corporal</p>
-                <p className="font-mono text-lg font-bold">{weightChange.last}kg</p>
-                <p className={`font-mono text-xs ${weightChange.diff < 0 ? 'text-success' : weightChange.diff > 0 ? 'text-orange-400' : 'text-muted-foreground'}`}>
-                  {weightChange.diff > 0 ? '+' : ''}{weightChange.diff}kg no período
-                </p>
-              </div>
-            )}
-
-            {weeklyReport.bestLifts.length > 0 && (
-              <div>
-                <p className="text-xs font-display font-bold mb-2">🏆 Melhores Cargas da Semana</p>
-                <div className="space-y-1">
-                  {weeklyReport.bestLifts.map(([name, weight]) => (
-                    <div key={name} className="flex items-center justify-between text-sm py-1">
-                      <span className="truncate">{name}</span>
-                      <span className="font-mono font-bold">{weight}kg</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-          <DialogFooter>
-            <Button onClick={() => setShowWeeklyReport(false)} className="w-full">Arrasou! 💪</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Also allow manual view of weekly report */}
+      {/* Weekly Report Dialog (auto-shown on Saturday) and Manual View Trigger */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }}>
-        <Button variant="outline" className="w-full" onClick={() => setShowWeeklyReport(true)}>
-          📊 Ver Relatório Semanal
-        </Button>
+        <WeeklyRecapModal open={showWeeklyReport} onOpenChange={setShowWeeklyReport} />
       </motion.div>
 
       {/* Log Weight Dialog */}

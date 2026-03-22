@@ -12,12 +12,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { UpdatePopup } from '@/components/ui/UpdatePopup';
+import { OnboardingQuest } from '@/components/home/OnboardingQuest';
 
 export default function HomePage() {
   const { profile, user } = useAuth();
   const [dietToday, setDietToday] = useState<any>(null);
   const [ranking, setRanking] = useState<any[]>([]);
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
+  const [totalWorkouts, setTotalWorkouts] = useState<number | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -34,6 +36,10 @@ export default function HomePage() {
     // Fetch recent feed activities
     supabase.from('feed_activities').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(5)
       .then(({ data }) => setRecentActivity(data || []));
+
+    // Fetch total workouts count
+    supabase.from('workout_sessions').select('id', { count: 'exact', head: true }).eq('user_id', user.id).eq('status', 'completed')
+      .then(({ count }) => setTotalWorkouts(count));
   }, [user]);
 
   if (!profile) return null;
@@ -51,6 +57,8 @@ export default function HomePage() {
         </h1>
         <p className="text-muted-foreground">Level up your body. Conquer your limits.</p>
       </motion.div>
+
+      <OnboardingQuest totalWorkouts={totalWorkouts} />
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
         <Card className="border-primary/20 glow-primary">

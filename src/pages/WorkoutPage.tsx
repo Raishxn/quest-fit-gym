@@ -11,7 +11,9 @@ import { useAuth } from '@/hooks/useAuth';
 import { recalculateLevel } from '@/lib/level';
 import { getRankTier, getNextRankInfo, getRankProgress, calculateRank, EXERCISE_RANK_CRITERIA, RANK_UP_MESSAGES } from '@/lib/exercise-ranks';
 import { PartyLobbyDialog } from '@/components/party/PartyLobbyDialog';
+import { BarbellCalculatorDialog } from '@/components/workout/BarbellCalculatorDialog';
 import { toast } from 'sonner';
+import confetti from 'canvas-confetti';
 
 interface WorkoutSession {
   id: string;
@@ -69,6 +71,7 @@ export default function WorkoutPage() {
   const [exerciseSearch, setExerciseSearch] = useState('');
   const [equipmentFilter, setEquipmentFilter] = useState<string>('all');
   const [sessionTimer, setSessionTimer] = useState(0);
+  const [restTimer, setRestTimer] = useState<number | null>(null);
   
   // Rank up animation  
   const [rankUpInfo, setRankUpInfo] = useState<{ exercise: string; oldRank: string; newRank: string } | null>(null);
@@ -90,6 +93,33 @@ export default function WorkoutPage() {
     }, 1000);
     return () => clearInterval(interval);
   }, [activeSession]);
+
+  // Rest timer
+  useEffect(() => {
+    let interval: any;
+    if (restTimer !== null && restTimer > 0) {
+      interval = setInterval(() => {
+        setRestTimer((prev) => {
+          if (prev && prev <= 1) {
+            playTimerFinish();
+            return null;
+          }
+          return prev ? prev - 1 : null;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [restTimer]);
+
+  const playTimerFinish = () => {
+    try {
+      if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+      const audio = new Audio('/check.mp3');
+      audio.volume = 0.8;
+      audio.play();
+      toast.success('Descanso concluído! Hora de voltar ao treino! ⚔️');
+    } catch(e) {}
+  };
 
   const loadData = async () => {
     if (!user) return;
@@ -264,6 +294,9 @@ export default function WorkoutPage() {
       const audio = new Audio('/check.mp3');
       audio.volume = 0.4;
       audio.play().catch(e => console.log('Audio error:', e));
+
+      // Start rest timer (default 90s, can make dynamic per exercise later)
+      setRestTimer(90);
     }
   };
 
@@ -312,6 +345,13 @@ export default function WorkoutPage() {
       audio.volume = 0.5;
       audio.play().catch(e => console.log('Audio error:', e));
 
+      confetti({
+        particleCount: 150,
+        spread: 80,
+        origin: { y: 0.6 },
+        colors: ['#F59E0B', '#EF4444', '#10B981']
+      });
+
       setRankUpInfo({ exercise: exercise.name, oldRank: currentRank, newRank });
       setExerciseRanks(prev => {
         const filtered = prev.filter(r => r.exercise_id !== exercise.id);
@@ -321,6 +361,12 @@ export default function WorkoutPage() {
       // Update best without rank change
       if (existing) {
         await supabase.from('exercise_ranks').update({ best_weight_kg: weightKg, best_reps: reps }).eq('id', existing.id);
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+        toast.success(`👑 NOVO RECORDE: ${weightKg}kg no ${exercise.name}!`);
       } else {
         await supabase.from('exercise_ranks').insert({
           user_id: user.id,
@@ -572,10 +618,12 @@ export default function WorkoutPage() {
                       </div>
                     );
                   })}
-                  <div className="flex gap-1.5">
+                  <div className="flex gap-1.5 justify-between items-center">
                     <Button variant="outline" size="sm" className="flex-1" onClick={() => addSet(exIdx)}>
                       <Plus className="h-3 w-3 mr-1" /> Série
                     </Button>
+                    {/* Add Barbell Calculator Here */}
+                    <BarbellCalculatorDialog defaultWeight={ae.sets[ae.sets.length - 1]?.weight_kg || 60} />
                   </div>
                 </CardContent>
               </Card>
@@ -704,6 +752,30 @@ export default function WorkoutPage() {
             </motion.div>
           </DialogContent>
         </Dialog>
+
+        {/* Floating Rest Timer */}
+        <AnimatePresence>
+          {restTimer !== null && (
+            <motion.div 
+              initial={{ y: 100, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 100, opacity: 0 }}
+              className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-card/95 backdrop-blur-md border-2 border-primary/50 px-5 py-3 rounded-full shadow-[0_0_30px_rgba(var(--primary-rgb),0.3)]"
+            >
+              <Timer className="w-5 h-5 text-primary animate-pulse" />
+              <div className="flex flex-col">
+                <span className="text-[10px] text-primary uppercase font-bold leading-none">Descanso</span>
+                <span className="font-mono text-xl font-bold leading-none">{Math.floor(restTimer / 60)}:{(restTimer % 60).toString().padStart(2, '0')}</span>
+              </div>
+              <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full ml-2" onClick={() => setRestTimer(null)}>
+                <X className="w-4 h-4 text-muted-foreground" />
+              </Button>
+              <Button size="sm" variant="outline" className="h-8 px-2 text-xs border-primary/30" onClick={() => setRestTimer(prev => (prev || 0) + 30)}>
+                +30s
+              </Button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     );
   }

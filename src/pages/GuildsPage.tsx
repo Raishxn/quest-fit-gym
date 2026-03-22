@@ -9,6 +9,7 @@ import { Shield, ShieldAlert, Search, LogOut } from 'lucide-react';
 import { toast } from 'sonner';
 import { CreateGuildDialog } from '@/components/guild/CreateGuildDialog';
 import { InfoTooltip } from '@/components/ui/info-tooltip';
+import { AnimatedEmptyState } from '@/components/ui/AnimatedEmptyState';
 
 export default function GuildsPage() {
   const { user } = useAuth();
@@ -78,16 +79,16 @@ export default function GuildsPage() {
   const GuildLobby = () => (
     <div className="space-y-6">
       <Card className="bg-card border-border">
-        <CardHeader className="text-center pb-2">
-          <div className="mx-auto w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mb-4">
-            <ShieldAlert className="w-8 h-8 text-primary" />
-          </div>
-          <CardTitle className="text-2xl flex items-center justify-center gap-2">
-             Você não está em uma Guilda
-             <InfoTooltip title="O que são Guildas?" content="Guildas são grupos de jogadores. Unir-se a uma aumenta o bônus de XP da party. Para fundar a sua própria guilda de elite, você precisará atingir um nível mínimo e possuir ouro (Em breve)." />
-          </CardTitle>
-          <CardDescription>Junte-se a guerreiros e conquiste a glória.</CardDescription>
-        </CardHeader>
+        <AnimatedEmptyState
+          icon={ShieldAlert}
+          title="Sem Guilda"
+          description="Você não está em nenhuma guilda. Junte-se a guerreiros e conquiste a glória."
+          color="primary"
+          className="min-h-0 py-8 pb-4"
+        />
+        <div className="flex justify-center -mt-4 mb-2 relative z-10 w-full">
+           <InfoTooltip title="O que são Guildas?" content="Guildas são grupos de jogadores. Unir-se a uma aumenta o bônus de XP da party. Para fundar a sua própria guilda de elite, você precisará atingir um nível mínimo e possuir ouro (Em breve)." />
+        </div>
         <CardContent className="space-y-4 pt-4">
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -100,7 +101,15 @@ export default function GuildsPage() {
           </div>
           <div className="pt-4 space-y-3">
              {filteredGuilds.length === 0 ? (
-               <p className="text-center text-muted-foreground py-4">Nenhuma guilda encontrada.</p>
+                <div className="py-4">
+                  <AnimatedEmptyState
+                    icon={Search}
+                    title="Nenhuma guilda"
+                    description="Não encontramos nenhuma guilda com este nome."
+                    color="secondary"
+                    className="min-h-0 py-4"
+                  />
+                </div>
              ) : (
                filteredGuilds.map(guild => (
                  <div key={guild.id} className="p-4 rounded-xl border border-border bg-secondary/50 flex justify-between items-center">

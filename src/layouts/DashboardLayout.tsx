@@ -4,6 +4,7 @@ import { AppSidebar } from '@/components/shared/AppSidebar';
 import { Topbar } from '@/components/shared/Topbar';
 import { BottomNav } from '@/components/shared/BottomNav';
 import { LevelUpTracker } from '@/components/rpg/LevelUpTracker';
+import { InteractiveTutorial } from '@/components/home/InteractiveTutorial';
 
 export function DashboardLayout() {
   return (
@@ -19,6 +20,7 @@ export function DashboardLayout() {
       </div>
       <BottomNav />
       <LevelUpTracker />
+      <InteractiveTutorial />
     </SidebarProvider>
   );
 }

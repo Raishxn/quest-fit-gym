@@ -43,7 +43,7 @@ export function Topbar() {
           </Button>
 
           {/* Avatar */}
-          <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all">
+          <div id="tour-profile-avatar" className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all">
             {profile.name.charAt(0)}
           </div>
         </>

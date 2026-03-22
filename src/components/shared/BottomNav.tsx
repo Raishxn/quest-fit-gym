@@ -14,7 +14,7 @@ const items = [
 
 export function BottomNav() {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/95 backdrop-blur-lg md:hidden">
+    <nav id="tour-nav-bar" className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/95 backdrop-blur-lg md:hidden">
       <div className="flex items-center justify-around py-2">
         {items.map((item) => (
           <NavLink

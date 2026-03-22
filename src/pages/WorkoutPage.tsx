@@ -12,6 +12,7 @@ import { recalculateLevel } from '@/lib/level';
 import { getRankTier, getNextRankInfo, getRankProgress, calculateRank, EXERCISE_RANK_CRITERIA, RANK_UP_MESSAGES } from '@/lib/exercise-ranks';
 import { PartyLobbyDialog } from '@/components/party/PartyLobbyDialog';
 import { BarbellCalculatorDialog } from '@/components/workout/BarbellCalculatorDialog';
+import { AnimatedEmptyState } from '@/components/ui/AnimatedEmptyState';
 import { toast } from 'sonner';
 import confetti from 'canvas-confetti';
 
@@ -903,10 +904,13 @@ export default function WorkoutPage() {
             </CardHeader>
             <CardContent className="space-y-3">
               {recentSessions.length === 0 ? (
-                <div className="text-center py-6 space-y-2">
-                  <Dumbbell className="h-8 w-8 mx-auto text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground italic">Nenhuma sessão ainda — comece sua jornada!</p>
-                </div>
+                <AnimatedEmptyState 
+                  icon={Clock} 
+                  title="Sem Histórico" 
+                  description="Nenhuma sessão ainda — comece sua jornada!" 
+                  color="secondary" 
+                  className="min-h-0 py-6" 
+                />
               ) : (
                 recentSessions.map(session => (
                   <div key={session.id} className="flex items-center gap-3 p-3 rounded-lg bg-secondary/50">
@@ -938,10 +942,13 @@ export default function WorkoutPage() {
             </CardHeader>
             <CardContent>
               {exerciseRanks.length === 0 ? (
-                <div className="text-center py-6 space-y-2">
-                  <p className="text-2xl">⚙️</p>
-                  <p className="text-sm text-muted-foreground italic">Todos os exercícios começam em Ferro. Registre séries para subir!</p>
-                </div>
+                <AnimatedEmptyState 
+                  icon={BarChart3} 
+                  title="Ranks Vazios" 
+                  description="Todos os exercícios começam em Ferro. Registre séries para subir!" 
+                  color="secondary" 
+                  className="min-h-0 py-6" 
+                />
               ) : (
                 <div className="grid grid-cols-1 gap-2">
                   {exerciseRanks.map(rank => {
